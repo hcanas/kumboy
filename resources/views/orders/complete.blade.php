@@ -47,7 +47,6 @@
     </div>
 
     <script defer>
-        localStorage.clear();
         sessionStorage.clear();
         document.querySelectorAll('.cart_item_count').forEach(el => {
             el.textContent = '';
