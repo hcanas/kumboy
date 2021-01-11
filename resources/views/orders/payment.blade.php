@@ -131,7 +131,7 @@
                 let currency_formatter = new Intl.NumberFormat('en-PH', { style : 'currency', currency : 'PHP' });
 
                 items.forEach(function (item) {
-                    map_origins.push(item.vendor.map_coordinates);
+                    map_origins.push(item.store.map_coordinates);
 
                     // item template
                     let item_template = document.getElementById('item_template').cloneNode(true);
@@ -202,8 +202,8 @@
                 // remove duplicate entry
                 map_origins = [...new Set(map_origins)];
                 const origins = map_origins.map(origin => {
-                    [vendor_lat, vendor_lng] = origin.split(',').map(x => parseFloat(x));
-                    return new google.maps.LatLng(vendor_lat, vendor_lng);
+                    [store_lat, store_lng] = origin.split(',').map(x => parseFloat(x));
+                    return new google.maps.LatLng(store_lat, store_lng);
                 });
 
                 // set destination

@@ -14,7 +14,7 @@ class ProfileController extends Controller
     public function __construct(Request $request)
     {
         $product = Product::query()
-            ->with('vendor')
+            ->with('store')
             ->with(['specifications' => function ($query) {
                 $query->orderBy('name');
             }])

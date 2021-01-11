@@ -21,7 +21,7 @@ class Product extends Model
         'preview',
     ];
 
-    public function vendor()
+    public function store()
     {
         return $this->belongsTo(Store::class, 'store_id', 'id');
     }

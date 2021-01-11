@@ -32,7 +32,7 @@ class OrderController extends DatabaseController
 
             $products = Product::query()
                 ->whereIn('id', $ids)
-                ->with('vendor')
+                ->with('store')
                 ->with(['specifications' => function ($query) {
                     $query->orderBy('name');
                 }])
@@ -136,7 +136,7 @@ class OrderController extends DatabaseController
 
                 $products = Product::query()
                     ->whereIn('id', array_keys($items))
-                    ->with('vendor')
+                    ->with('store')
                     ->with(['specifications' => function ($query) {
                         $query->orderBy('name');
                     }])

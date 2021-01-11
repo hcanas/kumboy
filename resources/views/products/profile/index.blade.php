@@ -46,7 +46,7 @@
                     </div>
                     <div class="col d-flex flex-column">
                         <span class="text-secondary">Sold by</span>
-                        <a href="{{ route('store.products', $product->vendor->id) }}">{{ $product->vendor->name }}</a>
+                        <a href="{{ route('store.products', $product->store->id) }}">{{ $product->store->name }}</a>
                     </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -54,8 +54,8 @@
                         &#8369;{{ number_format($product->price, 2, '.', ',') }}
                     </p>
                     <div class="d-flex justify-content-end">
-                        @if (Auth::check() AND Auth::user()->id === $product->vendor->user_id)
-                            <a href="{{ route('store.edit-product', [$product->vendor->id, $product->id]) }}" class="btn btn-primary btn-sm d-flex align-items-center me-2">
+                        @if (Auth::check() AND Auth::user()->id === $product->store->user_id)
+                            <a href="{{ route('store.edit-product', [$product->store->id, $product->id]) }}" class="btn btn-primary btn-sm d-flex align-items-center me-2">
                                 <i class="material-icons">edit</i>
                                 <span class="ms-1">Edit</span>
                             </a>
