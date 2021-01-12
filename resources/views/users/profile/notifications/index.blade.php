@@ -22,26 +22,25 @@
 {{--                {{ 'Displaying '.$item_start.'-'.$item_end.' of '.$total_count.'.' }}--}}
             </div>
 
-            @if ($notifications->whereNull('read_at')->count() > 0)
+            @if (count($unread = $notifications->whereNull('read_at')->all()) > 0)
                 <div class="bg-light px-2">
-                    @foreach ($notifications AS $notification)
-                        @if ($notification->read_at === null)
-                            <p class="mb-1">
-                                <span class="small text-secondary">{{ date('Y-m-d H:i:s', strtotime($notification->created_at)) }}</span>
-                                &#8285;
-                                {{ ucfirst($notification->data['message']) }}
-                                @if ($notification->data['type'] === 'store_request')
-                                    <a class="small" href="{{ route('user.read-notification', [Auth::user()->id, $notification->id]) }}">{{ $notification->data['code'] }}</a>
-                                @elseif ($notification->data['type'] === 'store_received')
-                                    <a class="small" href="{{ route('user.read-notification', [Auth::user()->id, $notification->id]) }}">View Store</a>
-                                @endif
-                            </p>
-                        @else
-                            @break;
-                        @endif
+                    @foreach ($unread AS $notification)
+                        <p class="mb-1">
+                            <span class="small text-secondary">{{ date('Y-m-d H:i:s', strtotime($notification->created_at)) }}</span>
+                            &#8285;
+                            {{ ucfirst($notification->data['message']) }}
+                            @if ($notification->data['type'] === 'store_request')
+                                <a class="small" href="{{ route('user.read-notification', [Auth::user()->id, $notification->id]) }}">{{ $notification->data['code'] }}</a>
+                            @elseif ($notification->data['type'] === 'store_received')
+                                <a class="small" href="{{ route('user.read-notification', [Auth::user()->id, $notification->id]) }}">View Store</a>
+                            @elseif ($notification->data['type'] === 'order')
+                                <a class="small" href="{{ route('user.read-notification', [Auth::user()->id, $notification->id]) }}">{{ $notification->data['tracking_number'] }}</a>
+                            @endif
+                        </p>
                     @endforeach
                 </div>
             @endif
+
             @if ($notifications->whereNotNull('read_at')->count() > 0)
                 <div class="px-2">
                     @foreach ($notifications AS $notification)

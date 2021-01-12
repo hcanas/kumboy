@@ -75,6 +75,10 @@ class NotificationController extends ProfileController
                     $redirect = redirect()
                         ->route('store.products', $notification->data['store_id']);
                     break;
+                case 'order':
+                    $redirect = redirect()
+                        ->route('user.store-order-details');
+                    break;
             }
 
             $this->commit();

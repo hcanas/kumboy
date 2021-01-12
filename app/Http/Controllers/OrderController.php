@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Events\OrderPlaced;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -157,7 +158,12 @@ class OrderController extends DatabaseController
                         'map_coordinates' => $validator->validated()['map_coordinates'],
                     ]);
 
+                $store_owner_ids = [];
                 foreach ($products AS $product) {
+                    if (in_array($product->store->user_id, $store_owner_ids) === false) {
+                        $store_owner_ids[] = $product->store->user_id;
+                    }
+
                     if ($product->qty < $items[$product->id]) {
                         $this->rollback();
                         return back()
@@ -182,6 +188,8 @@ class OrderController extends DatabaseController
                         'status' => 'pending',
                     ]);
                 }
+
+                event(new OrderPlaced($order, $store_owner_ids));
 
                 $this->commit();
 

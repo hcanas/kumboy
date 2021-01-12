@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Events\ApproveStoreApplication;
 use App\Events\CancelStoreApplication;
+use App\Events\OrderPlaced;
 use App\Events\RejectStoreApplication;
 use App\Events\StoreRequestCreate;
 use App\Events\UserAddAddress;
@@ -16,6 +17,7 @@ use App\Events\UserLogout;
 use App\Events\StoreRequestApprove;
 use App\Events\StoreRequestCancel;
 use App\Events\StoreRequestReject;
+use App\Listeners\LogActivityOrderPlaced;
 use App\Listeners\LogApproveStoreApplication;
 use App\Listeners\LogCancelStoreApplication;
 use App\Listeners\LogRejectStoreApplication;
@@ -30,6 +32,7 @@ use App\Listeners\LogUserLogout;
 use App\Listeners\LogStoreRequestApprove;
 use App\Listeners\LogStoreRequestCancel;
 use App\Listeners\LogStoreRequestReject;
+use App\Listeners\NotifyOrderSellers;
 use App\Listeners\NotifyStoreRequestApprove;
 use App\Listeners\NotifyStoreRequestCreate;
 use App\Listeners\NotifyStoreRequestReject;
@@ -78,6 +81,10 @@ class EventServiceProvider extends ServiceProvider
         StoreRequestCreate::class => [
             LogStoreRequestCreate::class,
             NotifyStoreRequestCreate::class,
+        ],
+        OrderPlaced::class => [
+            LogActivityOrderPlaced::class,
+            NotifyOrderSellers::class,
         ],
     ];
 
