@@ -181,6 +181,7 @@ class OrderController extends DatabaseController
 
                     $order->items()->create([
                         'order_id' => $order->id,
+                        'product_id' => $product->id,
                         'name' => $product->name,
                         'specifications' => $specifications,
                         'qty' => $items[$product->id],
