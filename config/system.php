@@ -27,4 +27,5 @@ return [
     'spending_limit' => [
         'guest' => 100000.00,
     ],
+    'delivery_fee_rate' => 9.00,
 ];
