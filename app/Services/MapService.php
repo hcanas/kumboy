@@ -32,4 +32,19 @@ class MapService
             return false;
         }
     }
+
+    public function getDistanceInKm($origin, $destination)
+    {
+        $response = Http::get(env('DISTANCEMATRIX_API_URL')
+            .'/json?origins='.$origin
+            .'&destinations='.$destination
+            .'&key='.env('GMAP_API_KEY')
+        );
+
+        if ($response->status() === 200 AND $response->json('status') === 'OK') {
+            return [true, round($response->json('rows')[0]['elements'][0]['distance']['value'] / 1000)];
+        } else {
+            return [false, 'Unable to get distance between coordinates.'];
+        }
+    }
 }
