@@ -17,6 +17,8 @@ class Order extends Model
         'address',
         'map_address',
         'map_coordinates',
+        'voucher_code',
+        'delivery_fee',
     ];
 
     protected $casts = [

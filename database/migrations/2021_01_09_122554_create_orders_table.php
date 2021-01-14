@@ -22,6 +22,8 @@ class CreateOrdersTable extends Migration
             $table->string('address');
             $table->string('map_address');
             $table->string('map_coordinates');
+            $table->string('voucher_code')->nullable();
+            $table->unsignedDecimal('delivery_fee', 15, 2);
             $table->dateTime('created_at');
             $table->dateTime('updated_at');
 
