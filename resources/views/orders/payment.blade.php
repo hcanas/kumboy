@@ -102,7 +102,7 @@
     </div>
 
     <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GMAP_API_KEY') }}" defer></script>
-    <script>
+    <script defer>
         const order_cart_status = sessionStorage.getItem('order_cart_status') ?? null;
         const order_address_status = sessionStorage.getItem('order_address_status') ?? null;
         const number_formatter = new Intl.NumberFormat('en-PH');
