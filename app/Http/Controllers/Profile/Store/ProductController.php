@@ -393,7 +393,7 @@ class ProductController extends ProfileController
                     Storage::put('products/images/preview/'.$filename, (string) $image->encode());
 
                     //upload thumbnail
-                    $image->resize(50, 50);
+                    $image->resize(100, 100);
                     Storage::put('products/images/thumbnail/'.$filename, (string) $image->encode());
 
                     ProductImage::query()
