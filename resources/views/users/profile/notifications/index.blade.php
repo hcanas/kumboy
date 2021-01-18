@@ -53,6 +53,8 @@
                                     <a class="small" href="{{ route('user.view-notification', [Auth::user()->id, $notification->id]) }}">{{ $notification->data['code'] }}</a>
                                 @elseif ($notification->data['type'] === 'store_received')
                                     <a class="small" href="{{ route('user.view-notification', [Auth::user()->id, $notification->id]) }}">View Store</a>
+                                @elseif ($notification->data['type'] === 'order')
+                                    <a class="small" href="{{ route('user.view-notification', [Auth::user()->id, $notification->id]) }}">{{ $notification->data['tracking_number'] }}</a>
                                 @endif
                             </p>
                         @endif

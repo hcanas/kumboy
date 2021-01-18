@@ -15,7 +15,7 @@ class ProductSpecificationSeeder extends Seeder
     public function run()
     {
         ProductSpecification::factory()
-            ->times(1000)
+            ->times(10000)
             ->create();
     }
 }

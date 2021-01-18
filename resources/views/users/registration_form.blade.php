@@ -5,11 +5,10 @@
     <div class="container">
         <div class="row">
             <div class="col-md-4 offset-md-4">
-                <div class="card mt-2 mt-md-5">
-                    <div class="card-title py-3 mb-0">
-                        <h4 class="text-center">Registration</h4>
+                <div class="card mt-5">
+                    <div class="card-header bg-white py-3">
+                        <h4 class="card-title text-center">Register</h4>
                     </div>
-                    <hr class="my-0">
                     <div class="card-body">
                         @if (session('message_content'))
                             <div class="alert alert-{{ session('message_type') }}">{{ session('message_content') }}</div>
@@ -18,26 +17,30 @@
                         <form method="POST">
                             @csrf
                             <div class="mb-3">
-                                <label for="name" class="form-label">Name</label>
-                                <input type="text" class="form-control" name="name" value="{{ old('name') }}">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="material-icons">person</i></span>
+                                    <input type="text" class="form-control" name="name" value="{{ old('name') }}" placeholder="Name">
+                                </div>
                                 @error('name')
                                     <div class="text-danger">{{ $message }}</div>
                                 @enderror
                             </div>
 
                             <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" name="email" id="email" value="{{ old('email') }}">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="material-icons">email</i></span>
+                                    <input type="email" class="form-control" name="email" id="email" value="{{ old('email') }}" placeholder="Email">
+                                </div>
                                 @error('email')
                                     <div class="text-danger">{{ $message }}</div>
                                 @enderror
                             </div>
 
                             <div class="mb-3">
-                                <label for="verification_code" class="form-label">Verification Code</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" name="verification_code" value="{{ old('verification_code') }}">
-                                    <button class="btn btn-primary" type="button" id="send-code">Send Code</button>
+                                    <span class="input-group-text"><i class="material-icons">dialpad</i></span>
+                                    <input type="text" class="form-control" name="verification_code" value="{{ old('verification_code') }}" placeholder="Verification Code">
+                                    <button class="btn btn-primary" type="button" id="send-code">Send</button>
                                 </div>
                                 @error('verification_code')
                                     <div class="text-danger">{{ $message }}</div>
@@ -45,23 +48,27 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" name="password">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="material-icons">lock</i></span>
+                                    <input type="password" class="form-control" name="password" placeholder="Password">
+                                </div>
                                 @error('password')
                                     <div class="text-danger">{{ $message }}</div>
                                 @enderror
                             </div>
 
                             <div class="mb-3">
-                                <label for="password_confirmation" class="form-label">Confirm Password</label>
-                                <input type="password" class="form-control" name="password_confirmation">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="material-icons">check</i></span>
+                                    <input type="password" class="form-control" name="password_confirmation" placeholder="Confirm Password">
+                                </div>
                                 @error('password_confirmation')
                                     <div class="text-danger">{{ $message }}</div>
                                 @enderror
                             </div>
 
                             <div class="d-grid d-block">
-                                <button type="submit" class="btn btn-primary">Register</button>
+                                <button type="submit" class="btn btn-primary">REGISTER</button>
                             </div>
                         </form>
 
@@ -107,7 +114,7 @@
                 .catch(function (error) {
                     if (error.response.status === 400) {
                         var errorMessage = '<div class="text-danger" id="email_error">' + error.response.data + '</div>';
-                        document.getElementById('email').insertAdjacentHTML('afterend', errorMessage);
+                        document.getElementById('email').parentNode.insertAdjacentHTML('afterend', errorMessage);
                     } else {
                         alert('Server error.');
                     }

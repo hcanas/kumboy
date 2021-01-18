@@ -4,12 +4,13 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ShopController;
 use App\Http\Controllers\Profile\Product\ProfileController as ProductProfileController;
 use App\Http\Controllers\Profile\Store\ProductController as StoreProductController;
 use App\Http\Controllers\Profile\User\ActivityController as UserActivityController;
 use App\Http\Controllers\Profile\User\AddressBookController as UserAddressBookController;
 use App\Http\Controllers\Profile\User\NotificationController as UserNotificationController;
+use App\Http\Controllers\Profile\User\StoreOrderController as UserStoreOrderController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\Profile\User\StoreRequestController as UserStoreRequestController;
 use App\Http\Controllers\Profile\User\StoreController as UserStoreController;
@@ -133,6 +134,11 @@ Route::prefix('users')->group(function () {
                 ->name('user.reject-store-request');
         });
 
+        Route::prefix('stores/orders')->group(function () {
+            Route::get('{tracking_number}/details', [UserStoreOrderController::class, 'view'])
+                ->name('user.store-order-details');
+        });
+
         // notifications
         Route::post('notifications/search', [UserNotificationController::class, 'searchNotification'])
             ->name('user.search-notification');
@@ -179,12 +185,12 @@ Route::prefix('stores')->group(function () {
 });
 
 /*
- * Product Route Group
+ * Shop Route Group
  */
-Route::prefix('products')->group(function() {
-    Route::post('search', [ProductController::class, 'search'])
-        ->name('product.search');
-    Route::get('view-all'
+Route::prefix('shop')->group(function () {
+    Route::post('search', [ShopController::class, 'search'])
+        ->name('shop.search');
+    Route::get('index'
             .'/{current_page?}'
             .'/{items_per_page?}'
             .'/{price_from?}'
@@ -194,10 +200,15 @@ Route::prefix('products')->group(function() {
             .'/{sort_by?}'
             .'/{sort_dir?}'
             .'/{keyword?}',
-            [ProductController::class, 'viewAll'])
-        ->name('product.view-all');
+            [ShopController::class, 'index'])
+        ->name('shop');
+});
 
-    Route::prefix('{id}')->group(function() {
+/*
+ * Product Route Group
+ */
+Route::prefix('products')->group(function () {
+    Route::prefix('{id}')->group(function () {
         Route::get('info', [ProductProfileController::class, 'index'])
             ->name('product.info');
     });
@@ -223,6 +234,9 @@ Route::prefix('orders')->group(function () {
         ->name('order.create');
     Route::get('complete/{tracking_number}', [OrderController::class, 'complete'])
         ->name('order.complete');
+
+    Route::get('checkout', [OrderController::class, 'checkout'])
+        ->name('order.checkout');
 });
 
 /*

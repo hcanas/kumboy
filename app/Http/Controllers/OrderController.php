@@ -9,6 +9,7 @@ use App\Models\UserAddressBook;
 use App\Models\VoucherCode;
 use App\Services\MapService;
 use App\Traits\Validation\HasUserAddressValidation;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -16,6 +17,11 @@ use Illuminate\Support\Facades\Validator;
 class OrderController extends DatabaseController
 {
     use HasUserAddressValidation;
+
+    public function checkout()
+    {
+        return view('orders.checkout');
+    }
 
     public function viewItems()
     {
@@ -113,7 +119,8 @@ class OrderController extends DatabaseController
 
         if ($items !== null AND is_array($items)) {
             foreach ($items AS $k => $v) {
-                if (ctype_digit($k) === false OR ctype_digit($v) === false) {
+                if ((ctype_digit($k) === false AND is_int($k) === false)
+                    OR (ctype_digit($v) === false AND is_int($v) === false)) {
                     return back()
                         ->with('message_type', 'danger')
                         ->with('message_content', 'Invalid request.');
@@ -156,12 +163,32 @@ class OrderController extends DatabaseController
                         'address' => $validator->validated()['address'],
                         'map_address' => $validator->validated()['map_address'],
                         'map_coordinates' => $validator->validated()['map_coordinates'],
+                        'voucher_code' => $voucher_code !== null ? $voucher_code->code : null,
+                        'delivery_fee' => 0,
                     ]);
 
-                $store_owner_ids = [];
+                $store_owner_ids = []; // for notification
+                $store_owner_coordinates = []; // for delivery fee
+                $delivery_fee_rate = config('system.delivery_fee_rate');
+                $delivery_fee = 0;
+
                 foreach ($products AS $product) {
                     if (in_array($product->store->user_id, $store_owner_ids) === false) {
                         $store_owner_ids[] = $product->store->user_id;
+                    }
+
+                    if (in_array($product->store->map_coordinates, $store_owner_coordinates) === false) {
+                        $store_owner_coordinates[] = $product->store->map_coordinates;
+                        list($status, $response) = $map_service->getDistanceInKm(
+                            $order->map_coordinates,
+                            $product->store->map_coordinates
+                        );
+
+                        if ($status === true) {
+                            $delivery_fee += ($delivery_fee_rate * $response);
+                        } else {
+                            throw new Exception($response);
+                        }
                     }
 
                     if ($product->qty < $items[$product->id]) {
@@ -189,6 +216,8 @@ class OrderController extends DatabaseController
                         'status' => 'pending',
                     ]);
                 }
+
+                $order->update(['delivery_fee' => $delivery_fee]);
 
                 event(new OrderPlaced($order, $store_owner_ids));
 

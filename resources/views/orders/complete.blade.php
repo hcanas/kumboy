@@ -8,19 +8,19 @@
                 <div class="row">
                     <div class="col-12 col-lg-8 offset-lg-2 d-flex align-items-center">
                         <div>
-                            <i class="material-icons material-icons-lg text-primary">shopping_cart</i>
+                            <i class="material-icons fs-48 text-primary">shopping_cart</i>
                         </div>
                         <div class="wizard-line bg-primary"></div>
                         <div>
-                            <i class="material-icons material-icons-lg text-primary">house</i>
+                            <i class="material-icons fs-48 text-primary">house</i>
                         </div>
                         <div class="wizard-line bg-primary"></div>
                         <div>
-                            <i class="material-icons material-icons-lg text-primary">payment</i>
+                            <i class="material-icons fs-48 text-primary">payment</i>
                         </div>
                         <div class="wizard-line bg-primary"></div>
                         <div>
-                            <i class="material-icons material-icons-lg text-primary">check_circle_outline</i>
+                            <i class="material-icons fs-48 text-primary">check_circle_outline</i>
                         </div>
                     </div>
                 </div>

@@ -5,19 +5,19 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
-class ProductController extends DatabaseController
+class ShopController extends DatabaseController
 {
     public function search(Request $request)
     {
-        $category = explode('|', $request->get('category', []));
-        $sort = explode('|', $request->get('sort', []));
+        $category = explode('|', $request->get('category') ?? []);
+        $sort = explode('|', $request->get('sort') ?? []);
 
         return redirect()
-            ->route('product.view-all', [
+            ->route('shop', [
                 'current_page' => 1,
                 'items_per_page' => 12,
-                'price_from' => $request->get('price_from', 0),
-                'price_to' => $request->get('price_to', 1000000),
+                'price_from' => $request->get('price_from') ?? 0,
+                'price_to' => $request->get('price_to') ?? 1000000,
                 'main_category' => $category[0] ?? 'all',
                 'sub_category' => $category[1] ?? 'all',
                 'sort_by' => $sort[0] ?? 'sold',
@@ -26,7 +26,7 @@ class ProductController extends DatabaseController
             ]);
     }
 
-    public function viewAll(
+    public function index(
         Request $request,
         $current_page = 1,
         $items_per_page = 12,
@@ -94,7 +94,7 @@ class ProductController extends DatabaseController
                 ->with('total_pages', ceil($total_count / $items_per_page))
                 ->with('items_per_page', $items_per_page)
                 ->with('keyword', $keyword)
-                ->with('route_name', 'product.view-all')
+                ->with('route_name', 'shop')
                 ->with('route_params', [
                     'items_per_page' => $items_per_page,
                     'price_from' => $price_from,

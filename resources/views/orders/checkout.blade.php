@@ -1,69 +1,45 @@
 @extends('layouts.app')
-@section('page-title', 'Cart')
+@section('page-title', 'Checkout')
 
 @section('content')
     <div class="container">
         <div class="row">
-            <div class="col-12 mt-5">
-                <div class="row">
-                    <div class="col-12 col-lg-8 offset-lg-2 d-flex align-items-center">
-                        <div>
-                            <i class="material-icons fs-48 text-secondary">shopping_cart</i>
-                        </div>
-                        <div class="wizard-line"></div>
-                        <div>
-                            <i class="material-icons fs-48">house</i>
-                        </div>
-                        <div class="wizard-line"></div>
-                        <div>
-                            <i class="material-icons fs-48">payment</i>
-                        </div>
-                        <div class="wizard-line"></div>
-                        <div>
-                            <i class="material-icons fs-48">check_circle_outline</i>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-12 col-lg-8 mt-3 mt-lg-5">
+                <h4 class="border-bottom my-0 pb-2">Cart</h4>
 
-                <h4 class="border-bottom mt-3 mt-lg-5">Cart Items</h4>
+                <div class="alert alert-danger my-2 d-none" id="cart_empty">Your cart is empty.</div>
 
-                <!-- items -->
                 <div id="cart_items_wrap">
-                    <div class="d-flex align-items-center d-none" id="item_template">
+                    <div class="d-flex align-items-stretch my-3 d-none" id="item_template">
                         <img class="item_thumbnail">
-                        <div class="ms-2 ellipsis flex-grow-1">
-                            <a href="#" class="h6 item_name"></a>
-                            <p class="text-muted small my-0 ellipsis item_specifications"></p>
-                        </div>
-                        <div class="flex-column">
-
-                        </div>
-                        <div class="col-12 col-lg-4 mb-2">
-                            <div class="row d-flex justify-content-between">
-                                <div class="col">
-                                    <form class="form_qty">
-                                        <div class="input-group">
-                                            <button class="btn btn-outline-dark btn-sm item_qty_dec" type="button">-</button>
-                                            <input type="number" class="form-control form-control-sm text-center no-spin item_qty">
-                                            <button class="btn btn-outline-dark btn-sm item_qty_inc" type="button">+</button>
-                                        </div>
-                                        <div class="form-text text-center item_stock"></div>
-                                    </form>
+                        <div class="d-flex flex-column justify-content-between ms-2 overflow-hidden">
+                            <a href="#" class="h6 my-0 item_name"></a>
+                            <div class="text-muted small my-0 ellipsis item_specifications"></div>
+                            <form class="form_qty">
+                                <div class="d-flex">
+                                    <div class="input-group">
+                                        <button class="btn btn-outline-dark btn-sm item_qty_dec" type="button">-</button>
+                                        <input type="number" class="form-control form-control-sm text-center no-spin item_qty">
+                                        <button class="btn btn-outline-dark btn-sm item_qty_inc" type="button">+</button>
+                                    </div>
+                                    <div class="form-text text-center item_stock"></div>
                                 </div>
-                                <div class="col">
-                                    <div class="h6 text-primary text-center item_cost my-0"></div>
-                                    <div class="text-muted text-center item_unit_price small"></div>
-                                </div>
+                            </form>
+                        </div>
+                        <div class="d-flex flex-column justify-content-between align-items-end w-50">
+                            <div>
+                                <div class="h6 text-primary text-center item_cost my-0"></div>
+                                <div class="text-muted text-center item_unit_price small"></div>
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-dark btn-sm d-flex justify-content-center align-items-center mx-lg-auto item_remove">
+                                    <i class="material-icons fs-16">delete</i>
+                                    <span class="ms-1">Remove</span>
+                                </button>
                             </div>
                         </div>
-                        <div class="col-12 col-lg-2 d-grid d-block d-lg-inline">
-                            <button class="btn btn-danger btn-sm d-flex justify-content-center align-items-center mx-lg-auto item_remove">
-                                <i class="material-icons fs-16">delete</i>
-                            </button>
-                        </div>
                     </div>
                 </div>
-                <!-- end items -->
 
                 <div class="row py-3 d-none">
                     <div class="col-12 col-lg-4 offset-lg-6 mb-2">
@@ -84,8 +60,6 @@
                         <div class="text text-danger small d-none" id="spending_limit_reached"></div>
                     </div>
                 </div>
-
-                <div class="alert alert-danger d-none" id="cart_empty">Your cart is empty.</div>
             </div>
         </div>
     </div>

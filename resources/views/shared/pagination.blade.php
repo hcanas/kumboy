@@ -1,5 +1,5 @@
 <nav class="my-3 d-flex justify-content-between align-items-center">
-    <p class="small text-secondary">
+    <p class="small text-muted">
         {{ $item_start.'-'.$item_end.' of '.$total_count }}
     </p>
     @if ($total_pages > 1)

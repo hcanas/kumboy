@@ -77,7 +77,7 @@ class NotificationController extends ProfileController
                     break;
                 case 'order':
                     $redirect = redirect()
-                        ->route('user.store-order-details');
+                        ->route('user.store-order-details', [$user_id, $notification->data['tracking_number']]);
                     break;
             }
 
@@ -112,6 +112,14 @@ class NotificationController extends ProfileController
                         $notification->data['user_id'],
                         $notification->data['code']
                     ]);
+                break;
+            case 'store_received':
+                $redirect = redirect()
+                    ->route('store.products', $notification->data['store_id']);
+                break;
+            case 'order':
+                $redirect = redirect()
+                    ->route('user.store-order-details', [$user_id, $notification->data['tracking_number']]);
                 break;
         }
 

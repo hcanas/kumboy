@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mt-3">
-        <div class="row">
+    <div class="container">
+        <div class="row mt-3">
             <div class="col-12 col-md-3">
                 <h4 class="mt-3">{{ $user->name }}</h4>
                 <p class="small my-0">{{ $user->email }}</p>
@@ -88,7 +88,7 @@
                 @endcan
             </div>
             <div class="col-12 col-md-9">
-                @include($content, $contentData)
+                @yield('profile-content')
             </div>
         </div>
     </div>

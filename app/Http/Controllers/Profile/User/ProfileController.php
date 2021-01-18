@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Profile\User;
 use App\Http\Controllers\DatabaseController;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 
 class ProfileController extends DatabaseController
 {
@@ -26,5 +27,6 @@ class ProfileController extends DatabaseController
 
         $this->user = $user;
         $this->profile->with('user', $user);
+        View::share('user', $user);
     }
 }
