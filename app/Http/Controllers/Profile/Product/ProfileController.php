@@ -2,15 +2,14 @@
 namespace App\Http\Controllers\Profile\Product;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\DatabaseController;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 
-class ProfileController extends Controller
+class ProfileController extends DatabaseController
 {
-    protected $product;
-
     public function __construct(Request $request)
     {
         $product = Product::query()
@@ -35,12 +34,11 @@ class ProfileController extends Controller
             abort(404);
         }
 
-        $this->product = $product;
         View::share('product', $product);
     }
 
     public function index()
     {
-        return view('products.profile.index');
+        return view('pages.product.profile');
     }
 }

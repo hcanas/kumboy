@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -44,49 +45,46 @@ class ShopController extends DatabaseController
             $products = Cache::tags(['shop', $request->url()])->get('data');
             $total_count = Cache::tags(['shop', $request->url()])->get('count');
         } else {
-            $query = Product::query();
+            $query = Product::query()
+                ->addSelect(['preview' => ProductImage::query()
+                    ->whereColumn('product_images.product_id', 'products.id')
+                    ->select('filename')
+                    ->limit(1)
+                ]);
 
-            if (empty($keyword) === false) {
+            if (!empty($keyword)) {
                 $query->whereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', [$keyword.'&']);
             }
 
-            if (empty($main_category) === false AND $main_category !== 'all') {
+            if (!empty($main_category) AND $main_category !== 'all') {
                 $query->where('main_category', $main_category);
             }
 
-            if (empty($sub_category) === false AND $sub_category !== 'all') {
+            if (!empty($sub_category) AND $sub_category !== 'all') {
                 $query->where('sub_category', $sub_category);
             }
 
-            $query->whereBetween('price', [$price_from ?? 0, $price_to ?? 1000000]);
+            $query->whereBetween('price', [$price_from, $price_to]);
 
             $total_count = $query->count();
 
             $products = $query->skip($offset)
                 ->take($items_per_page)
-                ->orderBy(
-                    in_array($sort_by, ['name', 'price', 'sold']) ? $sort_by : 'sold',
-                    in_array($sort_dir, ['asc', 'desc']) ? $sort_dir : 'desc'
-                )
+                ->orderBy($sort_by, $sort_dir)
                 ->get();
 
             Cache::tags(['shop', $request->url()])->put('data', $products);
             Cache::tags(['shop', $request->url()])->put('count', $total_count);
         }
 
-        return view('products.index')
+        return view('pages.product.shop')
             ->with('products', $products)
-            ->with('product_categories', config('system.product_categories'))
-            ->with('filters', [
-                'keyword' => $keyword,
-                'main_category' => $main_category,
-                'sub_category' => $sub_category,
-                'price_from' => $price_from,
-                'price_to' => $price_to,
-                'sort_by' => $sort_by,
-                'sort_dir' => $sort_dir,
-            ])
-            ->with('pagination', view('shared.pagination')
+            ->with('product_filter', view('partials.product_filter')
+                ->with('filters', $request->route()->parameters)
+                ->with('product_categories', config('system.product_categories'))
+                ->with('url', route('shop.search'))
+            )
+            ->with('pagination', view('partials.pagination')
                 ->with('item_start', $offset + 1)
                 ->with('item_end', $products->count() + $offset)
                 ->with('total_count', $total_count)
@@ -95,15 +93,7 @@ class ShopController extends DatabaseController
                 ->with('items_per_page', $items_per_page)
                 ->with('keyword', $keyword)
                 ->with('route_name', 'shop')
-                ->with('route_params', [
-                    'items_per_page' => $items_per_page,
-                    'price_from' => $price_from,
-                    'price_to' => $price_to,
-                    'main_category' => $main_category,
-                    'sub_category' => $sub_category,
-                    'sort_by' => $sort_by,
-                    'sort_dir' => $sort_dir,
-                ])
+                ->with('route_params', $request->route()->parameters)
             );
     }
 }

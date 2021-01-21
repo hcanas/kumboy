@@ -25,8 +25,8 @@ class ProductController extends ProfileController
                 'id' => $store_id,
                 'current_page' => 1,
                 'items_per_page' => 12,
-                'price_from' => $request->get('price_from', 0),
-                'price_to' => $request->get('price_to', 1000000),
+                'price_from' => $request->get('price_from') ?? 0,
+                'price_to' => $request->get('price_to') ?? 1000000,
                 'main_category' => $category[0] ?? 'all',
                 'sub_category' => $category[1] ?? 'all',
                 'sort_by' => $sort[0] ?? 'sold',
@@ -35,7 +35,7 @@ class ProductController extends ProfileController
             ]);
     }
 
-    public function viewStoreProducts(
+    public function index(
         Request $request,
         $store_id,
         $current_page = 1,
@@ -48,42 +48,38 @@ class ProductController extends ProfileController
         $sort_dir = 'desc',
         $keyword = null
     ) {
-
         $offset = ($current_page - 1) * $items_per_page;
 
-        if (Cache::tags(['shop', $request->url()])->has('data')) {
-            $products = Cache::tags(['shop', $request->url()])->get('data');
-            $total_count = Cache::tags(['shop', $request->url()])->get('count');
+        if (Cache::tags(['store-products', $request->url()])->has('data')) {
+            $products = Cache::tags(['store-products', $request->url()])->get('data');
+            $total_count = Cache::tags(['store-products', $request->url()])->get('count');
         } else {
             $query = Product::query()
                 ->where('store_id', $store_id);
 
-            if (empty($keyword) === false) {
-                $query->whereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', [$keyword.'&']);
+            if (!empty($keyword)) {
+                $query->whereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', [$keyword.'*']);
             }
 
-            if (empty($main_category) === false AND $main_category !== 'all') {
+            if (!empty($main_category) AND $main_category !== 'all') {
                 $query->where('main_category', $main_category);
             }
 
-            if (empty($sub_category) === false AND $sub_category !== 'all') {
+            if (!empty($sub_category) AND $sub_category !== 'all') {
                 $query->where('sub_category', $sub_category);
             }
 
-            $query->whereBetween('price', [$price_from ?? 0, $price_to ?? 1000000]);
+            $query->whereBetween('price', [$price_from, $price_to]);
 
             $total_count = $query->count();
 
             $products = $query->skip($offset)
                 ->take($items_per_page)
-                ->orderBy(
-                    in_array($sort_by, ['name', 'price', 'sold']) ? $sort_by : 'sold',
-                    in_array($sort_dir, ['asc', 'desc']) ? $sort_dir : 'desc'
-                )
+                ->orderBy($sort_by, $sort_dir)
                 ->get();
 
-            Cache::tags(['shop', $request->url()])->put('data', $products);
-            Cache::tags(['shop', $request->url()])->put('count', $total_count);
+            Cache::tags(['store-products', $request->url()])->put('data', $products);
+            Cache::tags(['store-products', $request->url()])->put('count', $total_count);
         }
 
         $product_categories = Product::query()
@@ -92,18 +88,23 @@ class ProductController extends ProfileController
             ->groupBy('main_category', 'sub_category')
             ->get();
 
-        return view('stores.profile.products.index')
+        // convert to array[main_category][sub_category] = []
+        $categories = [];
+        foreach ($product_categories AS $product_category) {
+            if ($product_category->sub_category !== null) {
+                $categories[$product_category->main_category][$product_category->sub_category] = [];
+            } else {
+                $categories[$product_category->main_category] = [];
+            }
+        }
+
+        return view('pages.store.profile.products')
             ->with('products', $products)
-            ->with('product_categories', $product_categories)
-            ->with('filters', [
-                'keyword' => $keyword,
-                'main_category' => $main_category,
-                'sub_category' => $sub_category,
-                'price_from' => $price_from,
-                'price_to' => $price_to,
-                'sort_by' => $sort_by,
-                'sort_dir' => $sort_dir,
-            ])
+            ->with('product_filter', view('partials.product_filter')
+                ->with('product_categories', $categories)
+                ->with('filters', $request->route()->parameters)
+                ->with('url', route('store.search-products', $store_id))
+            )
             ->with('pagination', view('shared.pagination')
                 ->with('item_start', $offset + 1)
                 ->with('item_end', $products->count() + $offset)
@@ -113,16 +114,7 @@ class ProductController extends ProfileController
                 ->with('items_per_page', $items_per_page)
                 ->with('keyword', $keyword)
                 ->with('route_name', 'store.products')
-                ->with('route_params', [
-                    'id' => $store_id,
-                    'items_per_page' => $items_per_page,
-                    'price_from' => $price_from,
-                    'price_to' => $price_to,
-                    'main_category' => $main_category,
-                    'sub_category' => $sub_category,
-                    'sort_by' => $sort_by,
-                    'sort_dir' => $sort_dir,
-                ])
+                ->with('route_params', $request->route()->parameters)
             );
     }
 
@@ -239,10 +231,6 @@ class ProductController extends ProfileController
                             'product_id' => $product->id,
                             'filename' => $filename,
                         ]);
-
-                    if ($i === 0) {
-                        $product->update(['preview' => $filename]);
-                    }
                 }
 
                 Cache::tags('shop')->flush();

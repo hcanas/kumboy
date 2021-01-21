@@ -20,7 +20,7 @@ class OrderController extends DatabaseController
 
     public function checkout()
     {
-        return view('orders.checkout');
+        return view('pages.order.checkout');
     }
 
     public function viewItems()

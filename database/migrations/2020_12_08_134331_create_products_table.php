@@ -23,7 +23,6 @@ class CreateProductsTable extends Migration
             $table->string('main_category');
             $table->string('sub_category')->nullable();
             $table->unsignedBigInteger('sold')->default(0);
-            $table->string('preview')->nullable();
 
             $table->foreign('store_id')->references('id')->on('stores');
             $table->engine = 'InnoDB';

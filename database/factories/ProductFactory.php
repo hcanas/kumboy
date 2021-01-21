@@ -26,7 +26,7 @@ class ProductFactory extends Factory
             ->inRandomOrder()
             ->first();
 
-        $category = ['Main 1', 'Main 2', 'Main 3', 'Main 4'];
+        $category = ['main 1', 'main 2', 'main 3', 'main 4'];
 
         return [
             'store_id' => $store->id,

@@ -33,27 +33,27 @@
             <div class="collapse navbar-collapse" id="navbar-toggled">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('shop') }}">Shop</a>
+                        <a class="nav-link" href="{{ route('shop') }}">SHOP</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('store.view-all') }}">Stores</a>
+                        <a class="nav-link" href="{{ route('store.list') }}">STORES</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('order.checkout') }}">
-                            Cart <span class="badge rounded-pill bg-primary cart_item_count"></span>
+                            CART <span class="badge rounded-pill bg-primary cart_item_count"></span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Order Tracking</a>
+                        <a class="nav-link" href="#">ORDER STATUS</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     @guest
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">Login</a>
+                            <a class="nav-link" href="{{ route('login') }}">LOGIN</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('user.register') }}">Register</a>
+                            <a class="nav-link" href="{{ route('user.register') }}">REGISTER</a>
                         </li>
                     @endguest
 

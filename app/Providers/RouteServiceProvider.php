@@ -48,8 +48,25 @@ class RouteServiceProvider extends ServiceProvider
                 ->group(base_path('routes/web.php'));
         });
 
+        // lists
         Route::pattern('current_page', '[0-9]+');
         Route::pattern('items_per_page', '[0-9]+');
+
+        // products
+        $categories = config('system.product_categories');
+        $main_categories = implode('|', array_keys($categories));
+        $sub_categories = rtrim(implode('|', array_map(function ($cat) {
+            return implode('|', array_keys($cat));
+        }, $categories)), '|');
+
+        Route::pattern('price_from', '[0-9]+');
+        Route::pattern('price_to', '[0-9]+');
+        Route::pattern('main_category', '(all|'.$main_categories.')');
+        Route::pattern('sub_category', '(all|'.$sub_categories.')');
+        Route::pattern('sort_by', '(name|price|sold)');
+        Route::pattern('sort_dir', '(asc|desc)');
+
+        // general
         Route::pattern('id', '[0-9]+');
         Route::pattern('sub_id', '[0-9]+');
     }

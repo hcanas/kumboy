@@ -157,8 +157,8 @@ Route::prefix('users')->group(function () {
 Route::prefix('stores')->group(function () {
     Route::post('search', [StoreController::class, 'search'])
         ->name('store.search');
-    Route::get('view-all/{current_page?}/{items_per_page?}/{keyword?}', [StoreController::class, 'viewAll'])
-        ->name('store.view-all');
+    Route::get('{current_page?}/{items_per_page?}/{keyword?}', [StoreController::class, 'index'])
+        ->name('store.list');
 
     Route::prefix('{id}')->group(function () {
         Route::post('search', [StoreProductController::class, 'search'])
@@ -173,7 +173,7 @@ Route::prefix('stores')->group(function () {
             .'/{sort_by?}'
             .'/{sort_dir?}'
             .'/{keyword?}',
-            [StoreProductController::class, 'viewStoreProducts']
+            [StoreProductController::class, 'index']
         )->name('store.products');
         Route::get('add-product', [StoreProductController::class, 'showAddProductForm'])
             ->name('store.add-product');
@@ -190,8 +190,7 @@ Route::prefix('stores')->group(function () {
 Route::prefix('shop')->group(function () {
     Route::post('search', [ShopController::class, 'search'])
         ->name('shop.search');
-    Route::get('index'
-            .'/{current_page?}'
+    Route::get('{current_page?}'
             .'/{items_per_page?}'
             .'/{price_from?}'
             .'/{price_to?}'

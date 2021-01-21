@@ -18,7 +18,6 @@ class Product extends Model
         'main_category',
         'sub_category',
         'sold',
-        'preview',
     ];
 
     public function store()
