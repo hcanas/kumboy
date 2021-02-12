@@ -14,7 +14,7 @@ class Store extends Model
         'user_id',
         'name',
         'contact_number',
-        'address',
+        'address_line',
         'map_coordinates',
         'map_address',
         'open_until',

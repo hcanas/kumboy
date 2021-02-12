@@ -10,7 +10,7 @@ class UserActivityPolicy
 {
     use HandlesAuthorization;
 
-    public function viewActivities(User $user, UserActivity $userActivity, int $user_id)
+    public function list(User $user, UserActivity $user_activity, int $user_id)
     {
         return $user->id === $user_id  OR in_array(strtolower($user->role), ['superadmin', 'admin']);
     }

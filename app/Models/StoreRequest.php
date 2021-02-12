@@ -11,8 +11,8 @@ class StoreRequest extends Model
 
     protected $fillable = [
         'user_id',
-        'code',
-        'type',
+        'ref_no',
+        'category',
         'status',
         'evaluated_by',
     ];
@@ -24,12 +24,12 @@ class StoreRequest extends Model
 
     public function storeApplication()
     {
-        return $this->hasOne(StoreApplication::class, 'request_code', 'code');
+        return $this->hasOne(StoreApplication::class, 'ref_no', 'ref_no');
     }
 
     public function storeTransfer()
     {
-        return $this->hasOne(StoreTransfer::class, 'request_code', 'code');
+        return $this->hasOne(StoreTransfer::class, 'ref_no', 'ref_no');
     }
 
     public function user()

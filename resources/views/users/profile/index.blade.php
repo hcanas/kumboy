@@ -29,7 +29,7 @@
                             <a class="nav-link px-0" href="{{ route('user.address-book',  $user->id) }}">Address Book</a>
                         </li>
                     @endcan
-                    @can('viewUserStores', [new \App\Models\Store(), $user->id])
+                    @can('listOwn', [new \App\Models\Store(), $user->id])
                         <li class="nav-item">
                             <a class="nav-link px-0" href="{{ route('user.stores',  $user->id) }}">Stores</a>
                         </li>
@@ -65,7 +65,7 @@
                                             <a class="nav-link px-0" href="{{ route('user.address-book', $user->id) }}">Address Book</a>
                                         </li>
                                     @endcan
-                                    @can('viewUserStores', [new \App\Models\Store(), $user->id])
+                                    @can('listOwn', [new \App\Models\Store(), $user->id])
                                         <li class="nav-item">
                                             <a class="nav-link px-0" href="{{ route('user.stores',  $user->id) }}">Stores</a>
                                         </li>
@@ -81,7 +81,7 @@
                     </div>
                 </div>
 
-                @can('banUser', $user)
+                @can('ban', $user)
                     <div class="mt-3">
                         <a href="#" class="btn btn-danger btn-sm">Ban User</a>
                     </div>

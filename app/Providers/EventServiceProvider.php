@@ -2,40 +2,32 @@
 
 namespace App\Providers;
 
-use App\Events\ApproveStoreApplication;
-use App\Events\CancelStoreApplication;
-use App\Events\OrderPlaced;
-use App\Events\RejectStoreApplication;
-use App\Events\StoreRequestCreate;
-use App\Events\UserAddAddress;
-use App\Events\UserChangeName;
-use App\Events\UserChangePassword;
-use App\Events\UserDeleteAddress;
-use App\Events\UserEditAddress;
-use App\Events\UserLogin;
-use App\Events\UserLogout;
-use App\Events\StoreRequestApprove;
-use App\Events\StoreRequestCancel;
-use App\Events\StoreRequestReject;
-use App\Listeners\LogActivityOrderPlaced;
-use App\Listeners\LogApproveStoreApplication;
-use App\Listeners\LogCancelStoreApplication;
-use App\Listeners\LogRejectStoreApplication;
-use App\Listeners\LogStoreRequestCreate;
-use App\Listeners\LogUserAddAddress;
-use App\Listeners\LogUserChangeName;
-use App\Listeners\LogUserChangePassword;
-use App\Listeners\LogUserDeleteAddress;
-use App\Listeners\LogUserEditAddress;
-use App\Listeners\LogUserLogin;
-use App\Listeners\LogUserLogout;
-use App\Listeners\LogStoreRequestApprove;
-use App\Listeners\LogStoreRequestCancel;
-use App\Listeners\LogStoreRequestReject;
-use App\Listeners\NotifyOrderSellers;
-use App\Listeners\NotifyStoreRequestApprove;
-use App\Listeners\NotifyStoreRequestCreate;
-use App\Listeners\NotifyStoreRequestReject;
+use App\Events\AcceptedStoreApplication;
+use App\Events\AcceptedStoreTransfer;
+use App\Events\AutoAcceptedStoreApplication;
+use App\Events\CancelledStoreApplication;
+use App\Events\CancelledStoreTransfer;
+use App\Events\GenericUserActivity;
+use App\Events\RejectedStoreApplication;
+use App\Events\RejectedStoreTransfer;
+use App\Events\StoreApplication;
+use App\Events\StoreTransfer;
+use App\Listeners\LogAcceptedStoreApplication;
+use App\Listeners\LogAcceptedStoreTransfer;
+use App\Listeners\LogAutoAcceptedStoreApplication;
+use App\Listeners\LogCancelledStoreApplication;
+use App\Listeners\LogCancelledStoreTransfer;
+use App\Listeners\LogGenericUserActivity;
+use App\Listeners\LogRejectedStoreApplication;
+use App\Listeners\LogRejectedStoreTransfer;
+use App\Listeners\LogStoreApplication;
+use App\Listeners\LogStoreTransfer;
+use App\Listeners\NotifyAcceptedStoreApplication;
+use App\Listeners\NotifyAcceptedStoreTransfer;
+use App\Listeners\NotifyRejectedStoreApplication;
+use App\Listeners\NotifyRejectedStoreTransfer;
+use App\Listeners\NotifyStoreApplication;
+use App\Listeners\NotifyStoreTransfer;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -46,45 +38,41 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        UserLogin::class => [
-            LogUserLogin::class,
+        GenericUserActivity::class => [
+            LogGenericUserActivity::class,
         ],
-        UserLogout::class => [
-            LogUserLogout::class,
+        StoreApplication::class => [
+            LogStoreApplication::class,
+            NotifyStoreApplication::class,
         ],
-        UserChangeName::class => [
-            LogUserChangeName::class,
+        AcceptedStoreApplication::class => [
+            LogAcceptedStoreApplication::class,
+            NotifyAcceptedStoreApplication::class,
         ],
-        UserChangePassword::class => [
-            LogUserChangePassword::class,
+        AutoAcceptedStoreApplication::class => [
+            LogAutoAcceptedStoreApplication::class,
         ],
-        UserAddAddress::class => [
-            LogUserAddAddress::class,
+        RejectedStoreApplication::class => [
+            LogRejectedStoreApplication::class,
+            NotifyRejectedStoreApplication::class,
         ],
-        UserEditAddress::class => [
-            LogUserEditAddress::class,
+        CancelledStoreApplication::class => [
+            LogCancelledStoreApplication::class,
         ],
-        UserDeleteAddress::class => [
-            LogUserDeleteAddress::class,
+        StoreTransfer::class => [
+            LogStoreTransfer::class,
+            NotifyStoreTransfer::class,
         ],
-        StoreRequestCancel::class => [
-            LogStoreRequestCancel::class,
+        AcceptedStoreTransfer::class => [
+            LogAcceptedStoreTransfer::class,
+            NotifyAcceptedStoreTransfer::class,
         ],
-        StoreRequestApprove::class => [
-            LogStoreRequestApprove::class,
-            NotifyStoreRequestApprove::class,
+        RejectedStoreTransfer::class => [
+            LogRejectedStoreTransfer::class,
+            NotifyRejectedStoreTransfer::class,
         ],
-        StoreRequestReject::class => [
-            LogStoreRequestReject::class,
-            NotifyStoreRequestReject::class,
-        ],
-        StoreRequestCreate::class => [
-            LogStoreRequestCreate::class,
-            NotifyStoreRequestCreate::class,
-        ],
-        OrderPlaced::class => [
-            LogActivityOrderPlaced::class,
-            NotifyOrderSellers::class,
+        CancelledStoreTransfer::class => [
+            LogCancelledStoreTransfer::class,
         ],
     ];
 

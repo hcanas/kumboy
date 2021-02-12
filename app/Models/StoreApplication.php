@@ -13,11 +13,11 @@ class StoreApplication extends Model
     protected $table = 'store_application_requests';
 
     protected $fillable = [
-        'request_code',
         'store_id',
+        'ref_no',
         'name',
         'contact_number',
-        'address',
+        'address_line',
         'map_coordinates',
         'map_address',
         'open_until',

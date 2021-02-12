@@ -16,7 +16,7 @@ use App\Http\Controllers\Profile\User\StoreRequestController as UserStoreRequest
 use App\Http\Controllers\Profile\User\StoreController as UserStoreController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\Profile\User\UserController as UserProfileController;
+use App\Http\Controllers\Profile\User\UserController as AccountSettingsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -71,66 +71,57 @@ Route::prefix('users')->group(function () {
 
     Route::post('search', [UserController::class, 'search'])
         ->name('user.search');
-    Route::get('view-all/{current_page?}/{items_per_page?}/{keyword?}', [UserController::class, 'viewAll'])
-        ->name('user.view-all');
+    Route::get('view-all/{current_page?}/{items_per_page?}/{keyword?}', [UserController::class, 'list'])
+        ->name('user.list');
 
     // profile
     Route::middleware('auth')->prefix('{id}')->group(function () {
         // activity log
-        Route::post('activities/search', [UserActivityController::class, 'searchActivity'])
+        Route::post('activity-log/search', [UserActivityController::class, 'search'])
             ->name('user.search-activity');
-        Route::get('activities/{current_page?}/{items_per_page?}/{keyword?}', [UserActivityController::class, 'viewActivities'])
+        Route::get('activity-log/{current_page?}/{items_per_page?}/{keyword?}', [UserActivityController::class, 'list'])
             ->name('user.activity-log');
 
         // account settings
-        Route::get('account-settings', [UserProfileController::class, 'showAccountSettings'])
+        Route::get('account-settings', [AccountSettingsController::class, 'showSettings'])
             ->name('user.account-settings');
-        Route::post('change-name', [UserProfileController::class, 'changeName'])
+        Route::post('change-name', [AccountSettingsController::class, 'changeName'])
             ->name('user.change-name');
-        Route::post('send-password-reset-code', [UserProfileController::class, 'sendPasswordResetCode']);
-        Route::post('change-password', [UserProfileController::class, 'changePassword'])
+        Route::post('send-password-reset-code', [AccountSettingsController::class, 'sendPasswordResetCode'])
+            ->name('user.request-password-reset-code');
+        Route::post('change-password', [AccountSettingsController::class, 'changePassword'])
             ->name('user.change-password');
 
         // address book
-        Route::get('address-book', [UserAddressBookController::class, 'showAddressBook'])
+        Route::get('address-book', [UserAddressBookController::class, 'list'])
             ->name('user.address-book');
-        Route::get('add-address', [UserAddressBookController::class, 'showAddAddressForm'])
-            ->name('user.add-address');
-        Route::post('add-address', [UserAddressBookController::class, 'addAddress']);
-        Route::get('edit-address/{sub_id}', [UserAddressBookController::class, 'showEditAddressForm'])
-            ->name('user.edit-address');
-        Route::post('edit-address/{sub_id}', [UserAddressBookController::class, 'editAddress']);
-        Route::get('delete-address/{sub_id}', [UserAddressBookController::class, 'showDeleteAddressDialog'])
+        Route::post('save-address', [UserAddressBookController::class, 'save'])
+            ->name('user.save-address');
+        Route::post('delete-address', [UserAddressBookController::class, 'delete'])
             ->name('user.delete-address');
-        Route::post('delete-address/{sub_id}', [UserAddressBookController::class, 'deleteAddress']);
 
         // store
-        Route::get('stores', [UserStoreController::class, 'showStores'])
+        Route::get('stores', [UserStoreController::class, 'list'])
             ->name('user.stores');
-        Route::get('stores/add', [UserStoreRequestController::class, 'showAddStoreForm'])
-            ->name('user.add-store');
-        Route::post('stores/add', [UserStoreRequestController::class, 'createStoreApplication']);
-        Route::get('stores/{sub_id}/edit', [UserStoreRequestController::class, 'showEditStoreForm'])
-            ->name('user.edit-store');
-        Route::post('stores/{sub_id}/edit', [UserStoreRequestController::class, 'createStoreApplication']);
-        Route::get('stores/{sub_id}/transfer', [UserStoreRequestController::class, 'showTransferStoreForm'])
-            ->name('user.transfer-store');
-        Route::post('stores/{sub_id}/transfer', [UserStoreRequestController::class, 'createStoreTransfer']);
-        Route::post('stores/{sub_id}/logo', [UserStoreController::class, 'uploadLogo'])
+        Route::post('stores/{sub_id}/upload-logo', [UserStoreController::class, 'uploadLogo'])
             ->name('user.upload-store-logo');
 
         Route::prefix('stores/requests')->group(function () {
-            Route::post('search', [UserStoreRequestController::class, 'searchRequest'])
+            Route::post('create-application', [UserStoreRequestController::class, 'createApplication'])
+                ->name('user.new-store-application');
+            Route::post('create-store-transfer', [UserStoreRequestController::class, 'createStoreTransfer'])
+                ->name('user.new-store-transfer');
+            Route::post('search', [UserStoreRequestController::class, 'search'])
                 ->name('user.search-store-request');
-            Route::get('{current_page?}/{items_per_page?}/{keyword?}', [UserStoreRequestController::class, 'viewRequests'])
+            Route::get('{current_page?}/{items_per_page?}/{keyword?}', [UserStoreRequestController::class, 'list'])
                 ->name('user.store-requests');
-            Route::get('{code}/view', [UserStoreRequestController::class, 'viewRequestDetails'])
+            Route::get('{ref_no}/view', [UserStoreRequestController::class, 'view'])
                 ->name('user.store-request-details');
-            Route::post('{code}/cancel', [UserStoreRequestController::class, 'cancelRequest'])
+            Route::post('{ref_no}/cancel', [UserStoreRequestController::class, 'cancel'])
                 ->name('user.cancel-store-request');
-            Route::post('{code}/approve', [UserStoreRequestController::class, 'approveRequest'])
-                ->name('user.approve-store-request');
-            Route::post('reject-request/{code}', [UserStoreRequestController::class, 'rejectRequest'])
+            Route::post('{ref_no}/accept', [UserStoreRequestController::class, 'accept'])
+                ->name('user.accept-store-request');
+            Route::post('{ref_no}/reject', [UserStoreRequestController::class, 'reject'])
                 ->name('user.reject-store-request');
         });
 
@@ -140,13 +131,13 @@ Route::prefix('users')->group(function () {
         });
 
         // notifications
-        Route::post('notifications/search', [UserNotificationController::class, 'searchNotification'])
+        Route::post('notifications/search', [UserNotificationController::class, 'search'])
             ->name('user.search-notification');
-        Route::get('notifications/{current_page?}/{items_per_page?}/{keyword?}', [UserNotificationController::class, 'viewAll'])
+        Route::get('notifications/{current_page?}/{items_per_page?}/{keyword?}', [UserNotificationController::class, 'list'])
             ->name('user.notifications');
-        Route::get('notifications/{notification}/read', [UserNotificationController::class, 'readNotification'])
+        Route::get('notifications/{notification}/read', [UserNotificationController::class, 'read'])
             ->name('user.read-notification');
-        Route::get('notifications/{notification}/view', [UserNotificationController::class, 'viewNotification'])
+        Route::get('notifications/{notification}/view', [UserNotificationController::class, 'view'])
             ->name('user.view-notification');
     });
 });
@@ -217,25 +208,18 @@ Route::prefix('products')->group(function () {
  * Orders Route Group
  */
 Route::prefix('orders')->group(function () {
-    Route::get('cart', [OrderController::class, 'viewItems'])
-        ->name('order.cart');
+    Route::get('checkout', [OrderController::class, 'checkout'])
+        ->name('order.checkout');
     Route::post('get-items', [OrderController::class, 'getItems'])
         ->name('order.get-items');
-    Route::get('select-address', [OrderController::class, 'showAddressForm'])
-        ->name('order.select-address');
     Route::get('user-address-book', [OrderController::class, 'getUserAddressBook'])
         ->name('order.user-address-book');
     Route::post('validate-address', [OrderController::class, 'validateAddress'])
         ->name('order.validate-address');
-    Route::get('payment', [OrderController::class, 'showPaymentForm'])
-        ->name('order.payment');
     Route::post('create', [OrderController::class, 'placeOrder'])
         ->name('order.create');
     Route::get('complete/{tracking_number}', [OrderController::class, 'complete'])
         ->name('order.complete');
-
-    Route::get('checkout', [OrderController::class, 'checkout'])
-        ->name('order.checkout');
 });
 
 /*
@@ -246,8 +230,8 @@ Route::middleware('auth')->prefix('requests')->group(function () {
         ->name('request.count-pending');
     Route::post('search', [RequestController::class, 'search'])
         ->name('request.search');
-    Route::get('{current_page?}/{items_per_page?}/{keyword?}', [RequestController::class, 'viewAll'])
-        ->name('request.view-all');
+    Route::get('{current_page?}/{items_per_page?}/{keyword?}', [RequestController::class, 'list'])
+        ->name('request.list');
 });
 
 /*

@@ -7,7 +7,7 @@ trait HasUserAddressValidation
         'label' => 'required',
         'contact_person' => 'required',
         'contact_number' => 'required|contact_number',
-        'address' => 'required',
+        'address_line' => 'required',
         'map_coordinates' => 'required',
         'map_address' => 'required',
     ];

@@ -6,7 +6,7 @@ trait HasStoreApplicationValidation
     private $store_application_rules = [
         'name' => 'required|store_application',
         'contact_number' => 'required|contact_number',
-        'address' => 'required',
+        'address_line' => 'required',
         'map_coordinates' => 'required',
         'map_address' => 'required',
         'open_until' => 'required|date|after:today',

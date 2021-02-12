@@ -6,57 +6,47 @@ use Illuminate\Http\Request;
 
 class ActivityController extends ProfileController
 {
-    public function searchActivity($user_id, Request $request)
+    public function search($user_id, Request $request)
     {
         return redirect()
             ->route('user.activity-log', [$user_id, 1, 25, $request->get('keyword')]);
     }
 
-    public function viewActivities($user_id, $current_page = 1, $items_per_page = 12, $keyword = null)
+    public function list($user_id, $current_page = 1, $items_per_page = 12, $keyword = null)
     {
-        $this->authorize('viewActivities', [new UserActivity(), $user_id]);
+        $this->authorize('list', [new UserActivity(), $user_id]);
 
-        $this->profile->with('content', 'users.profile.activity.index');
-
-        $userActivity = UserActivity::query()
+        $activity_log = UserActivity::query()
             ->where('user_id', $user_id);
 
         if (empty($keyword) === false) {
-            $userActivity->whereRaw('MATCH (action_taken) AGAINST (? IN BOOLEAN MODE)', [$keyword.'*']);
+            $activity_log->whereRaw('MATCH (action_taken) AGAINST (? IN BOOLEAN MODE)', [$keyword.'*']);
         }
 
-        $total_count = $userActivity->count();
+        $total_count = $activity_log->count();
         $offset = ($current_page - 1) * $items_per_page;
 
-        $activities = $userActivity->skip($offset)
+        $activities = $activity_log->skip($offset)
             ->take($items_per_page)
             ->orderByDesc('date_recorded')
             ->get();
 
-        return $this->profile
-            ->with('contentData', [
-                'user' => $this->user,
-                'activities' => $activities,
-                'item_start' => $offset + 1,
-                'item_end' => $activities->count() + $offset,
-                'total_count' => $total_count,
-                'current_page' => $current_page,
-                'total_pages' => ceil($total_count / $items_per_page),
-                'items_per_page' => $items_per_page,
-                'keyword' => $keyword,
-                'pagination' => view('shared.pagination')
-                    ->with('item_start', $offset + 1)
-                    ->with('item_end', $activities->count() + $offset)
-                    ->with('total_count', $total_count)
-                    ->with('current_page', $current_page)
-                    ->with('total_pages', ceil($total_count / $items_per_page))
-                    ->with('items_per_page', $items_per_page)
-                    ->with('keyword', $keyword)
-                    ->with('route_name', 'user.activity-log')
-                    ->with('route_params', [
-                        'id' => $user_id,
-                        'items_per_page' => $items_per_page,
-                    ]),
-            ]);
+        return view('pages.user.activity.list')
+            ->with('activities', $activities)
+            ->with('keyword', $keyword)
+            ->with('pagination', view('shared.pagination')
+                ->with('item_start', $offset + 1)
+                ->with('item_end', $activities->count() + $offset)
+                ->with('total_count', $total_count)
+                ->with('current_page', $current_page)
+                ->with('total_pages', ceil($total_count / $items_per_page))
+                ->with('items_per_page', $items_per_page)
+                ->with('keyword', $keyword)
+                ->with('route_name', 'user.activity-log')
+                ->with('route_params', [
+                    'id' => $user_id,
+                    'items_per_page' => $items_per_page,
+                ])
+            );
     }
 }

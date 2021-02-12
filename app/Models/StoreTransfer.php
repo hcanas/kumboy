@@ -13,7 +13,7 @@ class StoreTransfer extends Model
     protected $table = 'store_transfer_requests';
 
     protected $fillable = [
-        'request_code',
+        'ref_no',
         'store_id',
         'target_id',
         'attachment',

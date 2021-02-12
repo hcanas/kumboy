@@ -3,18 +3,20 @@
 
 @section('content')
     <div class="container mt-3">
-        <h4 class="border-bottom border-2 border-secondary my-0 py-2">Shop</h4>
-        <div class="row mt-3">
-            <div class="col-12 col-md-4 col-xl-3">
-                @php
-                    echo $product_filter;
-                @endphp
-            </div>
-            <div class="col-12 col-md-8 col-xl-9 mt-3 mt-md-0">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex flex-column flex-lg-row justify-content-lg-between align-items-lg-end border-bottom my-2">
+                    <h4>Shop</h4>
+                    <div class="my-2">
+                        @php
+                            echo $product_filter;
+                        @endphp
+                    </div>
+                </div>
                 @if ($products->isEmpty())
                     <div class="alert alert-danger">No records found.</div>
                 @else
-                    <div class="row row-cols-3 g-2 gx-lg-4 gx-xl-2 row-cols-sm-4 row-cols-md-3 row-cols-lg-4 row-cols-xl-6">
+                    <div class="row row-cols-3 row-cols-md-4 row-cols-lg-auto gx-1 gx-lg-2 gy-2 g-lg-2 px-lg-2 px-xxl-3">
                         @foreach ($products AS $product)
                             <div class="col">
                                 <a href="{{ route('product.info', $product->id) }}" class="card-link-wrapper">

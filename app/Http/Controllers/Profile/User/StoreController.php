@@ -3,28 +3,31 @@ namespace App\Http\Controllers\Profile\User;
 
 use App\Models\Store;
 use App\Models\User;
+use App\Services\ImageService;
+use App\Traits\Validation\HasStoreApplicationValidation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Intervention\Image\Facades\Image;
 
 class StoreController extends ProfileController
 {
-    public function showStores($user_id)
-    {
-        $this->authorize('viewUserStores', [new Store(), $user_id]);
+    use HasStoreApplicationValidation;
 
-        $this->profile->with('content', 'users.profile.stores.index');
+    public function list($user_id)
+    {
+        $this->authorize('listOwn', [new Store(), $user_id]);
 
         $stores = Store::query()
             ->where('user_id', $user_id)
+            ->orderBy('name')
             ->get();
 
-        return $this->profile->with('contentData', ['stores' => $stores]);
+        return view('pages.user.store.list')
+            ->with('stores', $stores);
     }
 
-    public function uploadLogo(Request $request, $user_id, $store_id)
+    public function uploadLogo(Request $request, ImageService $image_service, $user_id, $store_id)
     {
         if ($request->wantsJson()) {
             $store = Store::query()
@@ -36,44 +39,37 @@ class StoreController extends ProfileController
                 return response()->json('Store not found.', 404);
             }
 
-            $validator = Validator::make($request->all(), [
-                'store_logo' => 'required|file|mimetypes:image/jpeg,image/png',
-            ]);
-
-            if ($validator->failed()) {
-                return response()->json($validator->errors(), 400);
-            }
-
             $gate = Gate::inspect('uploadLogo', $store);
 
             if ($gate->allowed()) {
+                $validator = Validator::make($request->all(), [
+                    'logo' => 'required|file|mimetypes:image/jpeg,image/png',
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json($validator->errors(), 400);
+                }
+
                 try {
-                    $logo = Image::make($request->file('store_logo')->path());
-                    $logo->resize(
-                        $logo->width() > 150 ? 150 : $logo->width(),
-                        $logo->height() > 150 ? 150 : $logo->height()
-                    );
+                    if ($logo = $image_service->make($request->file('logo'))) {
+                        $ext = substr($logo->mime(), strpos($logo->mime(), '/') + 1);
+                        $filename = $store_id.'_'.strtotime('now').'.'.$ext;
+                        $logo = $image_service->resize($request->file('logo'), 150, 150, 0);
 
-                    if ($logo->mime() === 'image/png') {
-                        $file_ext = '.png';
-                    } elseif ($logo->mime() === 'image/jpeg') {
-                        $file_ext = '.jpg';
+                        if ($store->logo !== null) {
+                            Storage::delete('stores/logos/'.$store->logo);
+                        }
+
+                        $store->update(['logo' => $filename]);
+                        Storage::put('stores/logos/'.$filename, $logo);
+
+                        return response()->json($filename);
+                    } else {
+                        return response()->json('File is not a valid png/jpg image.', 400);
                     }
-
-                    $filename = $store_id.'_'.strtotime('now').$file_ext;
-
-                    if ($store->logo !== null) {
-                        Storage::delete('stores/logos/'.$store->logo);
-                    }
-
-                    Storage::put('stores/logos/'.$filename, (string) $logo->encode());
-
-                    $store->update(['logo' => $filename]);
-
-                    return response()->json($filename);
                 } catch (\Exception $e) {
                     logger($e);
-                    return response()->json('Server error.', 500);
+                    return response()->json('Unable to upload logo. Try again later.', 500);
                 }
             } else {
                 return response()->json('Forbidden.', 403);
@@ -81,50 +77,47 @@ class StoreController extends ProfileController
         }
     }
 
-    protected function addStore($user_id, $data)
+    protected function create($data)
     {
-        Store::query()
+        $store = Store::query()
             ->create([
-                'user_id' => $user_id,
+                'user_id' => $data->user_id,
                 'name' => $data->name,
                 'contact_number' => $data->contact_number,
-                'address' => $data->address,
+                'address_line' => $data->address_line,
                 'map_coordinates' => $data->map_coordinates,
                 'map_address' => $data->map_address,
                 'open_until' => $data->open_until,
             ]);
+
+        return $store;
     }
 
-    protected function updateStore($storeUuid, $data)
+    protected function update($store_id, $data)
     {
         $store = Store::query()
-            ->where('id', $storeUuid)
+            ->where('id', $store_id)
             ->first();
 
-        if ($store === null) {
-            abort(404);
-        }
-
         $store->update([
-            'user_id' => $data['user_id'],
             'name' => $data['name'],
             'contact_number' => $data['contact_number'],
-            'address' => $data['address'],
+            'address_line' => $data['address_line'],
             'map_address' => $data['map_address'],
             'map_coordinates' => $data['map_coordinates'],
             'open_until' => $data['open_until'],
         ]);
     }
 
-    protected function transferStore($ownerUuid, $storeUuid, $targetUuid)
+    protected function transfer($owner_id, $store_id, $target_id)
     {
         $store = Store::query()
-            ->where('id', $storeUuid)
-            ->where('user_id', $ownerUuid)
+            ->where('id', $store_id)
+            ->where('user_id', $owner_id)
             ->first();
 
         $target = User::query()
-            ->where('id', $targetUuid)
+            ->where('id', $target_id)
             ->first();
 
         if ($store === null OR $target === null) {
@@ -132,7 +125,7 @@ class StoreController extends ProfileController
         }
 
         $store->update([
-            'user_id' => $targetUuid,
+            'user_id' => $target_id,
         ]);
     }
 }

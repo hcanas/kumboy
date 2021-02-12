@@ -1,5 +1,5 @@
-$primary: #A81118;
-$secondary: #F0E68C;
+$primary: #A91115;
+$secondary: #FFB92D;
 $danger: $primary;
 
 // Links
@@ -58,6 +58,7 @@ $link-hover-decoration: underline;
 @import "~bootstrap/scss/utilities/api";
 // scss-docs-end import-stack
 
-@import 'custom_navbar';
-@import 'custom_font';
-@import 'misc';
+@import "custom_font";
+@import "custom_nav";
+@import "custom_navbar";
+@import "misc";

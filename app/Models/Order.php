@@ -14,7 +14,7 @@ class Order extends Model
         'tracking_number',
         'contact_person',
         'contact_number',
-        'address',
+        'address_line',
         'map_address',
         'map_coordinates',
         'voucher_code',

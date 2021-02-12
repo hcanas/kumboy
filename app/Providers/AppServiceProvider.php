@@ -70,8 +70,9 @@ class AppServiceProvider extends ServiceProvider
 
             $store_request = StoreRequest::query()
                 ->where('status', 'pending')
-                ->whereHas('storeApplication', function ($query) use ($value) {
-                    $query->where('name', $value);
+                ->whereHas('storeApplication', function ($query) use ($value, $store_id) {
+                    $query->where('name', $value)
+                        ->orWhere('store_id', $store_id);
                 })
                 ->first();
 

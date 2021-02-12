@@ -19,7 +19,7 @@ class CreateUserAddressBookTable extends Migration
             $table->string('label');
             $table->string('contact_person');
             $table->string('contact_number');
-            $table->string('address');
+            $table->string('address_line');
             $table->string('map_coordinates');
             $table->string('map_address');
 

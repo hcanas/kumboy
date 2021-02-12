@@ -17,8 +17,8 @@ class CreateStoreRequestsTable extends Migration
         Schema::create('store_requests', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('code')->unique();
-            $table->string('type');
+            $table->string('ref_no')->unique();
+            $table->string('category');
             $table->string('status');
             $table->unsignedBigInteger('evaluated_by')->nullable();
             $table->dateTime('created_at');
@@ -29,7 +29,7 @@ class CreateStoreRequestsTable extends Migration
             $table->engine = 'InnoDB';
         });
 
-        DB::statement('ALTER TABLE store_requests ADD FULLTEXT (code, type, status)');
+        DB::statement('ALTER TABLE store_requests ADD FULLTEXT (ref_no, type, status)');
     }
 
     /**

@@ -1,11 +1,11 @@
-<form action="{{ $url }}" method="POST">
+<form class="row row-cols-lg-auto gx-2 align-items-end" action="{{ $url }}" method="POST">
     @csrf
 
-    <div class="mb-2">
+    <div class="col-12">
         <input type="search" name="keyword" class="form-control form-control-sm" value="{{ $filters['keyword'] ?? '' }}" placeholder="Search keyword...">
     </div>
 
-    <div class="mb-2">
+    <div class="col-12">
         <label>Categories</label>
         <select name="category" class="form-select form-select-sm">
             <option value="all|all"
@@ -29,7 +29,7 @@
         </select>
     </div>
 
-    <div class="mb-2">
+    <div class="col-12">
         <label>Price</label>
         <div class="d-flex align-items-center">
             <input type="number" name="price_from" class="form-control form-control-sm" value="{{ $filters['price_from'] ?? 0 }}" min="0" max="1000000" step="0.01">
@@ -38,7 +38,7 @@
         </div>
     </div>
 
-    <div class="mb-4">
+    <div class="col-12">
         <label>Sort By</label>
         <select name="sort" class="form-select form-select-sm">
             <option value="sold|desc" {{ (isset($filters['sort_by'], $filters['sort_dir']) AND $filters['sort_by'] === 'sold' AND $filters['sort_dir'] === 'desc') ? 'selected' : '' }}>Best Sellers</option>
@@ -49,12 +49,10 @@
         </select>
     </div>
 
-    <div class="row">
-        <div class="col d-grid d-block">
-            <a href="{{ route('shop') }}" class="btn btn-outline-dark btn-sm">Reset</a>
-        </div>
-        <div class="col d-grid d-block">
-            <button type="submit" class="btn btn-primary btn-sm">Apply Filter</button>
-        </div>
+    <div class="col d-grid d-block d-lg-inline mt-3 mt-lg-0">
+        <a href="{{ route('shop') }}" class="btn btn-outline-dark btn-sm">Reset</a>
+    </div>
+    <div class="col d-grid d-block d-lg-inline mt-3 mt-lg-0">
+        <button type="submit" class="btn btn-primary btn-sm">Apply</button>
     </div>
 </form>

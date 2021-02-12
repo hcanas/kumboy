@@ -19,7 +19,7 @@ class CreateStoresTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('name')->unique();
             $table->string('contact_number');
-            $table->string('address');
+            $table->string('address_line');
             $table->string('map_coordinates');
             $table->string('map_address');
             $table->date('open_until');

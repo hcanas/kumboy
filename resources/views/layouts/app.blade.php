@@ -5,6 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+
     <!-- Bootstrap CSS -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
@@ -14,18 +16,40 @@
     <title>@yield('page-title')</title>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-custom bg-secondary sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-custom bg-white sticky-top">
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">
-                <img src="{{ asset('images/logo.jpg') }}">
+                <img src="{{ asset('images/logo.png') }}">
             </a>
-            <ul class="navbar-nav ms-auto me-3 d-lg-none">
+            <ul class="navbar-nav flex-row ms-auto mt-2 me-3 d-lg-none nav-external">
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center" href="{{ route('order.checkout') }}">
-                        <i class="material-icons material-icons-md">shopping_cart</i>
-                        <span class="badge rounded-pill bg-primary cart_item_count"></span>
+                    <a class="nav-link" href="{{ route('order.checkout') }}">
+                        <div class="d-flex align-items-center">
+                            <i class="material-icons material-icons-md">shopping_cart</i>
+                            <span class="badge badge-notify rounded-pill bg-primary cart_item_count"></span>
+                        </div>
                     </a>
                 </li>
+                @can('list', new \App\Models\StoreRequest())
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('request.list') }}">
+                            <div class="d-flex align-items-center">
+                                <i class="material-icons">pending_actions</i>
+                                <span class="badge badge-notify rounded-pill bg-primary pending_request_count"></span>
+                            </div>
+                        </a>
+                    </li>
+                @endcan
+                @auth
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('user.notifications', Auth::user()->id) }}">
+                            <div class="d-flex align-items-center">
+                                <i class="material-icons">notifications_active</i>
+                                <span class="badge badge-notify rounded-pill bg-primary notification_count"></span>
+                            </div>
+                        </a>
+                    </li>
+                @endauth
             </ul>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-toggled" aria-controls="navbar-toggled" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -39,12 +63,16 @@
                         <a class="nav-link" href="{{ route('store.list') }}">STORES</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('order.checkout') }}">
-                            CART <span class="badge rounded-pill bg-primary cart_item_count"></span>
-                        </a>
+                        <a class="nav-link" href="#">ORDER STATUS</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">ORDER STATUS</a>
+                        <a class="nav-link" href="{{ route('order.checkout') }}" title="Cart">
+                            <div class="d-flex align-items-center">
+                                <i class="material-icons d-none d-lg-inline">shopping_cart</i>
+                                <span class="me-1 d-lg-none">CART</span>
+                                <span class="badge rounded-pill bg-primary cart_item_count"></span>
+                            </div>
+                        </a>
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
@@ -58,28 +86,46 @@
                     @endguest
 
                     @auth
-                        @can('viewAll', new \App\Models\User())
+                        @can('list', new \App\Models\User())
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('user.view-all') }}">Users</a>
+                                <a class="nav-link" href="{{ route('user.list') }}" title="Users">
+                                    <div class="d-flex align-items-center">
+                                        <i class="material-icons d-none d-lg-inline">people</i>
+                                        <span class="d-lg-none">USERS</span>
+                                    </div>
+                                </a>
                             </li>
                         @endcan
-                        @can('viewAllRequests', new \App\Models\StoreRequest())
+                        @can('list', new \App\Models\StoreRequest())
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('request.view-all') }}">
-                                    Requests <span class="badge rounded-pill bg-primary" id="pending_request_count"></span>
+                                <a class="nav-link" href="{{ route('request.list') }}" title="Requests">
+                                    <div class="d-flex align-items-center">
+                                        <i class="material-icons d-none d-lg-inline">pending_actions</i>
+                                        <span class="me-1 d-lg-none">REQUESTS</span>
+                                        <span class="badge rounded-pill bg-primary pending_request_count"></span>
+                                    </div>
                                 </a>
                             </li>
                         @endcan
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('user.notifications', Auth::user()->id) }}">
-                                Notifications <span class="badge rounded-pill bg-primary" id="notification_count"></span>
+                            <a class="nav-link" href="{{ route('user.notifications', Auth::user()->id) }}" title="Notifications">
+                                <div class="d-flex align-items-center">
+                                    <i class="material-icons d-none d-lg-inline">notifications_active</i>
+                                    <span class="me-1 d-lg-none">NOTIFICATIONS</span>
+                                    <span class="badge rounded-pill bg-primary notification_count"></span>
+                                </div>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('user.activity-log', Auth::user()->id) }}">{{ Auth::user()->name }}</a>
+                            <a class="nav-link" href="{{ route('user.activity-log', Auth::user()->id) }}">{{ strtoupper(Auth::user()->name) }}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('logout') }}">Logout</a>
+                            <a class="nav-link" href="{{ route('logout') }}" title="Logout">
+                                <div class="d-flex align-items-center">
+                                    <i class="material-icons d-none d-lg-inline">logout</i>
+                                    <span class="me-1 d-lg-none">LOGOUT</span>
+                                </div>
+                            </a>
                         </li>
                     @endauth
                 </ul>
@@ -89,8 +135,7 @@
 
     <script type="text/javascript" src="{{ asset('js/app.js') }}"></script>
 
-    {{-- Check for pending requests and notifications every 5 seconds --}}
-    <script>
+    <script defer>
         let role = '{{ Auth::check() ? Auth::user()->role : '' }}';
         count();
 
@@ -102,38 +147,77 @@
             if (role.match('admin')) {
                 axios.get('{{ route('request.count-pending') }}')
                     .then(function (response) {
-                        let pending = parseInt(response.data);
-                        document.getElementById('pending_request_count').innerText = pending > 0 ? pending : '';
+                        const pending = parseInt(response.data);
+                        const el_pending_request_count = document.querySelectorAll('.pending_request_count');
+
+                        el_pending_request_count.forEach(el => {
+                            el.innerText = pending > 0 ? pending : '';
+                        });
                     });
             }
 
             if (role) {
                 axios.get('{{ route('notification.count-unread') }}')
                     .then(function (response) {
-                        let unread = parseInt(response.data);
-                        document.getElementById('notification_count').innerText = unread > 0 ? unread : '';
+                        const unread = parseInt(response.data);
+                        const el_notification_count = document.querySelectorAll('.notification_count');
+
+                        el_notification_count.forEach(el => {
+                            el.innerText = unread > 0 ? unread : '';
+                        });
                     });
             }
         }
     </script>
 
     <!-- Cart -->
-    <script>
+    <script defer>
         class Cart_class {
             constructor() {
-                try {
-                    let json = JSON.parse(sessionStorage.getItem('cart'));
+                this.items = JSON.parse(localStorage.getItem('cart_items') ?? '[]');
+                setInterval(() => {
+                    this.items = JSON.parse(localStorage.getItem('cart_items') ?? '[]');
+                }, 200);
+            }
 
-                    if (json && typeof json === 'object') {
-                        this.items = json;
-                        this.notify();
-                    } else {
-                        this.items = [];
-                        sessionStorage.setItem('cart', '');
-                    }
-                } catch (e) {
-                    this.items = [];
-                    sessionStorage.setItem('cart', '');
+            addItem(id, qty) {
+                id = parseInt(id);
+                qty = parseInt(qty);
+
+                const item_index = this.getItemIndex(id);
+
+                if (item_index === null) {
+                    this.items.push({id, qty});
+                    this.save();
+                } else {
+                    console.log('Item already exists in cart.');
+                }
+            }
+
+            removeItem(id) {
+                id = parseInt(id);
+
+                const item_index = this.getItemIndex(id);
+
+                if (item_index) {
+                    this.items.splice(item_index, 1);
+                    this.save();
+                } else {
+                    console.log('Item not found in cart.');
+                }
+            }
+
+            updateItem(id, qty) {
+                id = parseInt(id);
+                qty = parseInt(qty);
+
+                const item_index = this.getItemIndex(id);
+
+                if (item_index) {
+                    this.items[item_index].qty = qty;
+                    this.save();
+                } else {
+                    console.log('Item not found in cart.');
                 }
             }
 
@@ -142,113 +226,54 @@
             }
 
             getItem(id) {
-                id = this.parseInt(id);
+                id = parseInt(id);
 
-                if (id) {
-                    let ret = null;
+                const item_index = this.getItemIndex(id);
 
-                    this.items.some(item => {
-                        if (item.id === id) {
-                            ret = item;
-                        }
-                    })
-
-                    return ret;
+                if (item_index) {
+                    return this.items[item_index];
                 } else {
-                    console.log('Unknown id.');
+                    console.log('Item not found in cart.');
                 }
             }
 
             getItemIndex(id) {
-                id = this.parseInt(id);
-                let index = null;
+                id = parseInt(id);
 
+                let index = null;
                 Object.keys(this.items).forEach(key => {
                     if (this.items[key].id === id) {
-                        index = key
+                        index = key;
                     }
                 });
 
                 return index;
             }
 
-            addItem(id, qty) {
-                id = this.parseInt(id);
-                qty = this.parseInt(qty);
-
-                if (id && qty) {
-                    // check duplicate
-                    let index = this.getItemIndex(id);
-
-                    if (index) {
-                        this.items[index].qty += qty;
-                    } else {
-                        this.items.push({
-                            id: id,
-                            qty: qty,
-                        });
-                        this.notify();
-                    }
-                    sessionStorage.setItem('cart', JSON.stringify(this.items));
-                    sessionStorage.setItem('order_cart_status', '');
-                } else {
-                    console.log('Invalid id or qty.');
-                }
-            }
-
-            removeItem(id) {
-                id = this.parseInt(id);
-
-                if (id) {
-                    let index = this.getItemIndex(id);
-
-                    if (index) {
-                        this.items.splice(index, 1);
-                        sessionStorage.setItem('cart', JSON.stringify(this.items));
-                        sessionStorage.setItem('order_cart_status', '');
-                        this.notify();
-                    } else {
-                        console.log('Unknown id.');
-                    }
-                } else {
-                    console.log('Unknown id.');
-                }
-            }
-
-            updateItem(id, qty) {
-                id = this.parseInt(id);
-                qty = this.parseInt(qty);
-
-                if (id && qty) {
-                    let index = this.getItemIndex(id);
-
-                    if (index) {
-                        this.items[index].qty = qty;
-                        sessionStorage.setItem('cart', JSON.stringify(this.items));
-                    } else {
-                        console.log('Unknown id.');
-                    }
-                } else {
-                    console.log('Invalid id or qty.');
-                }
-            }
-
             count() {
                 return this.items.length;
             }
 
-            notify() {
-                document.querySelectorAll('.cart_item_count').forEach(el => {
-                    el.textContent = this.items.length > 0 ? this.items.length : '';
-                });
-            }
-
-            parseInt(n) {
-                return parseInt(n) > 0 ? parseInt(n) : null;
+            save() {
+                localStorage.setItem('cart_items', JSON.stringify(this.items));
             }
         }
 
         window.Cart = new Cart_class();
+
+        notifyCart();
+        setInterval(() => {
+            notifyCart()
+        }, 100);
+
+        function notifyCart() {
+            const item_count = Cart.count();
+            const cart_notifications = document.querySelectorAll('.cart_item_count');
+
+            cart_notifications.forEach(notif => {
+                notif.textContent = item_count > 0 ? item_count : '';
+            });
+        }
     </script>
     <!-- End Cart -->
 

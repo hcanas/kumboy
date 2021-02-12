@@ -53,23 +53,13 @@ class OrderController extends DatabaseController
         }
     }
 
-    public function showAddressForm()
-    {
-        $address_book = UserAddressBook::query()
-            ->where('user_id', Auth::check() ? Auth::id() : null)
-            ->get();
-
-        return view('orders.address')
-            ->with('address_book', $address_book->isNotEmpty() ? $address_book : []);
-    }
-
     public function validateAddress(Request $request, MapService $map_service)
     {
         if ($request->wantsJson()) {
             $validator = Validator::make($request->all(), $this->getUserAddressRules([
                 'contact_person',
                 'contact_number',
-                'address',
+                'address_line',
                 'map_address',
                 'map_coordinates',
             ]));
@@ -86,13 +76,9 @@ class OrderController extends DatabaseController
         }
     }
 
-    public function showPaymentForm()
-    {
-        return view('orders.payment');
-    }
-
     public function placeOrder(Request $request, MapService $map_service)
     {
+        // TODO
         // items array indexes are product ids, values are corresponding quantities
         $items = $request->get('items');
         $voucher_code = $request->get('voucher_code');
@@ -100,7 +86,7 @@ class OrderController extends DatabaseController
         $validator = Validator::make($request->all(), $this->getUserAddressRules([
             'contact_person',
             'contact_number',
-            'address',
+            'address_line',
             'map_address',
             'map_coordinates',
         ]));

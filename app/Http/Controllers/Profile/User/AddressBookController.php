@@ -1,194 +1,116 @@
 <?php
 namespace App\Http\Controllers\Profile\User;
 
-use App\Events\UserAddAddress;
-use App\Events\UserDeleteAddress;
-use App\Events\UserEditAddress;
+use App\Events\GenericUserActivity;
 use App\Models\UserAddressBook;
 use App\Services\MapService;
 use App\Traits\Validation\HasUserAddressValidation;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
 
 class AddressBookController extends ProfileController
 {
     use HasUserAddressValidation;
 
-    public function showAddressBook($user_id)
+    public function list($user_id)
     {
-        $this->authorize('viewAddressBook', [new UserAddressBook(), $user_id]);
+        $this->authorize('manage', [new UserAddressBook(), $user_id]);
 
-        $this->profile->with('content', 'users.profile.address_book.index');
-
-        $user_address_book = UserAddressBook::query()
+        $address_book = UserAddressBook::query()
             ->where('user_id', $user_id)
             ->get();
 
-        return $this->profile->with('contentData', ['addressBook' => $user_address_book]
-        );
+        return view('pages.user.address.list')
+            ->with('list', $address_book);
     }
 
-    public function showAddAddressForm($user_id)
+    public function save($user_id, Request $request, MapService $map_service)
     {
-        $this->authorize('addAddress', [new UserAddressBook(), $user_id]);
+        if ($request->wantsJson()) {
+            $gate = Gate::inspect('manage', [new UserAddressBook(), $user_id]);
 
-        return $this->profile
-            ->with('content', 'users.profile.address_book.form')
-            ->with('contentData', [
-                'form_title' => 'Add Address',
-            ]);
-    }
+            if ($gate->allowed()) {
+                $validator = Validator::make($request->all(), $this->getUserAddressRules());
 
-    public function addAddress($user_id, Request $request, MapService $map_service)
-    {
-        $this->authorize('addAddress', [new UserAddressBook(), $user_id]);
+                if ($validator->fails()) {
+                    return response()->json($validator->errors(), 400);
+                }
 
-        $validated_data = $request->validate($this->getUserAddressRules());
-        $validated_data['user_id'] = $user_id;
+                if ($map_service->isValidAddress($request->get('map_coordinates'), $request->get('map_address'))) {
+                    try {
+                        $this->beginTransaction();
 
-        try {
-            $this->beginTransaction();
+                        if ($request->get('id')) {
+                            $user_address = UserAddressBook::query()->find($request->get('id'));
 
-            if ($map_service->isValidAddress($validated_data['map_coordinates'], $validated_data['map_address'])) {
-                $userAddress = UserAddressBook::query()
-                    ->create($validated_data);
+                            if ($user_address === null) {
+                                return response()->json('User address not found.', 404);
+                            }
 
-                event(new UserAddAddress($userAddress));
+                            $old_label = $user_address->label;
+                            $user_address->update($validator->validated());
 
-                $this->commit();
+                            if ($old_label === $user_address->label) {
+                                $activity = 'Updated "'.$old_label.'" address.';
+                            } else {
+                                $activity = 'Updated "'.$user_address->label.'" (prev. '.$old_label.') address.';
+                            }
 
-                return redirect()->route('user.address-book', $user_id);
+                            event(new GenericUserActivity($activity));
+                        } else {
+                            $user_address = UserAddressBook::query()
+                                ->create(array_merge(['user_id' => $user_id], $validator->validated()));
+
+                            event(new GenericUserActivity('Added '.$user_address->label.' address.'));
+                        }
+
+                        $this->commit();
+
+                        return response()->json($user_address);
+                    } catch (\Exception $e) {
+                        $this->rollback();
+                        logger($e);
+                        return response()->json('Unable to add address, try again later.', 500);
+                    }
+                } else {
+                    return response()->json('Invalid map address or location is out of service area.', 400);
+                }
             } else {
-                $this->rollback();
-
-                return back()
-                    ->with('message_type', 'danger')
-                    ->with('message_content', 'Invalid map address or location is out of service area.');
+                return response()->json('Forbidden.', 403);
             }
-        } catch (\Exception $e) {
-            $this->rollback();
-            logger($e);
-            return back()
-                ->with('message_type', 'danger')
-                ->with('message_content', 'Server error.');
         }
     }
 
-    public function showEditAddressForm($user_id, $addressID)
+    public function delete(Request $request, $user_id)
     {
-        $userAddress = UserAddressBook::query()
-            ->find($addressID);
+        if ($request->wantsJson()) {
+            $user_address = UserAddressBook::query()->find($request->get('id'));
 
-        if ($userAddress === null) {
-            abort(404);
-        }
+            if ($user_address === null) {
+                return response()->json('User address not found.', 404);
+            }
 
-        $this->authorize('edit-address', $userAddress);
+            $gate = Gate::inspect('delete', $user_address);
 
-        return $this->profile->with('content', 'users.profile.address_book.form')
-            ->with('contentData', [
-                'form_title' => 'Edit Address',
-                'form_data' => $userAddress,
-            ]);
-    }
+            if ($gate->allowed()) {
+                try {
+                    $this->beginTransaction();
 
-    public function editAddress($user_id, $addressID, Request $request, MapService $map_service)
-    {
-        $userAddress = UserAddressBook::query()
-            ->find($addressID);
+                    $user_address->delete();
+                    event(new GenericUserActivity('Deleted "'.$user_address->label.'" address.'));
 
-        if ($userAddress === null) {
-            abort(404);
-        }
+                    $this->commit();
 
-        $this->authorize('editAddress', $userAddress);
-
-        $validated_data = $request->validate($this->getUserAddressRules());
-        $validated_data['user_id'] = $user_id;
-
-        try {
-            $this->beginTransaction();
-
-            if ($map_service->isValidAddress($validated_data['map_coordinates'], $validated_data['map_address'])) {
-                $userAddress->fill($validated_data);
-                $oldAddress = $userAddress->getOriginal();
-                $userAddress->save();
-
-                event(new UserEditAddress($userAddress, $oldAddress));
-
-                $this->commit();
-
-                return back()
-                    ->with('message_type', 'success')
-                    ->with('message_content', $userAddress->wasChanged()
-                        ? 'Address has been changed.'
-                        : 'No changes made.'
-                    );
+                    return response($user_address->label.' address has been deleted.');
+                } catch (\Exception $e) {
+                    $this->rollback();
+                    logger($e);
+                    return response()->json('Unable to delete address. Try again later.', 500);
+                }
             } else {
-                $this->rollback();
-
-                return back()
-                    ->with('message_type', 'danger')
-                    ->with('message_content', 'Invalid map address or location is out of service area.');
+                return response()->json('Forbidden.', 403);
             }
-        } catch (\Exception $e) {
-            $this->rollback();
-            logger($e);
-            return back()
-                ->with('message_type', 'danger')
-                ->with('message_content', 'Server error.');
-        }
-    }
-
-    public function showDeleteAddressDialog($user_id, $addressID)
-    {
-        $address = UserAddressBook::query()
-            ->find($addressID);
-
-        if ($address === null) {
-            abort(404);
-        }
-
-        $this->authorize('deleteAddress', $address);
-
-        return $this->profile
-            ->with('content', 'users.profile.address_book.delete_dialog')
-            ->with('contentData', [
-                'address' => $address,
-            ]);
-    }
-
-    public function deleteAddress($user_id, $addressID)
-    {
-        $userAddress = UserAddressBook::query()
-            ->find($addressID);
-
-        if ($userAddress === null) {
-            abort(404);
-        }
-
-        $this->authorize('deleteAddress', $userAddress);
-
-        try {
-            $this->beginTransaction();
-
-            $userAddress->delete();
-
-            event(new UserDeleteAddress($userAddress));
-
-           $this->commit();
-
-            return redirect()
-                ->route('user.address-book', $user_id)
-                ->with('message_type', 'success')
-                ->with('message_content', 'Address has been deleted.');
-        } catch (\Exception $e) {
-            $this->rollback();
-            logger($e);
-            return redirect()
-                ->route('user.address-book', $user_id)
-                ->with('message_type', 'danger')
-                ->with('message_content', 'Server error.');
         }
     }
 }

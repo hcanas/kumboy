@@ -9,14 +9,10 @@ use Illuminate\Support\Facades\View;
 
 class ProfileController extends DatabaseController
 {
-    protected $profile = 'users.profile.index';
-
     protected $user;
 
     public function __construct(Request $request)
     {
-        $this->profile = view($this->profile);
-
         $user = User::query()
             ->where('id', $request->route('id'))
             ->first();
@@ -26,7 +22,6 @@ class ProfileController extends DatabaseController
         }
 
         $this->user = $user;
-        $this->profile->with('user', $user);
         View::share('user', $user);
     }
 }

@@ -1,14 +1,15 @@
 .navbar-custom {
   .navbar-brand img {
-    width: 150px;
+    width: 125px;
 
     @include media-breakpoint-up(lg) {
-      width: 250px;
+      width: 200px;
     }
   }
 
   .navbar-nav {
     .nav-link {
+      position: relative;
       color: $primary;
       font-weight: bold;
 
@@ -22,6 +23,14 @@
       //&.disabled {
       //  color: $navbar-dark-disabled-color;
       //}
+
+      .badge {
+        @include media-breakpoint-up(lg) {
+          position: absolute;
+          top: -4px;
+          right: -4px;
+        }
+      }
     }
 
     .show > .nav-link,
@@ -29,6 +38,17 @@
       //color: tint-color($primary, 10%);
       border-bottom: $primary 0.25rem solid;
       padding-bottom: 0.25rem;
+    }
+  }
+
+  .nav-external {
+    .nav-link {
+      margin-right: 0.5rem;
+    }
+    .badge {
+      position: absolute;
+      top: -4px;
+      right: -10px;
     }
   }
 

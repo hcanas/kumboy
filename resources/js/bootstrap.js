@@ -28,3 +28,5 @@ window.axios = require('axios');
 // });
 
 window.bootstrap = require('bootstrap');
+
+window.dateFormat = require('dateformat');

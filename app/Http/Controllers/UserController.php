@@ -106,7 +106,7 @@ class UserController extends DatabaseController
 
     public function showRegistrationForm()
     {
-        return view('users.registration_form');
+        return view('pages.auth.registration');
     }
 
     public function register(Request $request, VerificationService $verification_service)
@@ -143,7 +143,7 @@ class UserController extends DatabaseController
 
     public function showPasswordResetForm()
     {
-        return view('users.forgot_password');
+        return view('pages.auth.recovery');
     }
 
     public function resetPassword(Request $request)
@@ -174,17 +174,17 @@ class UserController extends DatabaseController
     public function search(Request $request)
     {
         return redirect()
-            ->route('user.view-all', [1, 25, $request->get('keyword')]);
+            ->route('user.list', [1, 25, $request->get('keyword')]);
     }
 
-    public function viewAll($current_page = 1, $items_per_page = 12, $keyword = null)
+    public function list($current_page = 1, $items_per_page = 12, $keyword = null)
     {
-        $this->authorize('viewAll', new User());
+        $this->authorize('list', new User());
 
         $users = User::query();
 
-        if (empty($keyword) === false) {
-            $users->whereRaw('MATCH (id, name, email) AGAINST(? IN BOOLEAN MODE)', [$keyword.'*']);
+        if (!empty($keyword)) {
+            $users->whereRaw('MATCH (name, email, role) AGAINST(? IN BOOLEAN MODE)', [$keyword.'*']);
         }
 
         $offset = ($current_page - 1) * $items_per_page;
@@ -195,14 +195,21 @@ class UserController extends DatabaseController
             ->orderBy('name')
             ->get();
 
-        return view('users.index')
+        return view('pages.user.list')
             ->with('users', $list)
-            ->with('item_start', $offset + 1)
-            ->with('item_end', $list->count() + $offset)
-            ->with('total_count', $total_count)
-            ->with('current_page', $current_page)
-            ->with('total_pages', ceil($total_count / $items_per_page))
-            ->with('items_per_page', $items_per_page)
-            ->with('keyword', $keyword);
+            ->with('keyword', $keyword)
+            ->with('pagination', view('partials.pagination')
+                ->with('item_start', $offset + 1)
+                ->with('item_end', $list->count() + $offset)
+                ->with('total_count', $total_count)
+                ->with('current_page', $current_page)
+                ->with('total_pages', ceil($total_count / $items_per_page))
+                ->with('items_per_page', $items_per_page)
+                ->with('keyword', $keyword)
+                ->with('route_name', 'user.list')
+                ->with('route_params', [
+                    'items_per_page' => $items_per_page,
+                ])
+            );
     }
 }

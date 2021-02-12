@@ -23,12 +23,12 @@ class RequestController extends Controller
     public function search(Request $request)
     {
         return redirect()
-            ->route('request.view-all', [1, 25, $request->get('keyword')]);
+            ->route('request.list', [1, 25, $request->get('keyword')]);
     }
 
-    public function viewAll($current_page = 1, $items_per_page = 12, $keyword = null)
+    public function list($current_page = 1, $items_per_page = 12, $keyword = null)
     {
-        $this->authorize('viewAllRequests', new StoreRequest());
+        $this->authorize('list', new StoreRequest());
 
         $offset = ($current_page - 1) * $items_per_page;
 
@@ -61,14 +61,20 @@ class RequestController extends Controller
             ->orderByRaw('status = "pending" DESC, created_at DESC')
             ->get();
 
-        return view('requests.index')
-            ->with('store_requests', $list)
-            ->with('item_start', $offset + 1)
-            ->with('item_end', $list->count() + $offset)
-            ->with('total_count', $total_count)
-            ->with('current_page', $current_page)
-            ->with('total_pages', ceil($total_count / $items_per_page))
-            ->with('items_per_page', $items_per_page)
-            ->with('keyword', $keyword);
+        return view('pages.request.list')
+            ->with('requests', $list)
+            ->with('pagination', view('partials.pagination')
+                ->with('item_start', $offset + 1)
+                ->with('item_end', $list->count() + $offset)
+                ->with('total_count', $total_count)
+                ->with('current_page', $current_page)
+                ->with('total_pages', ceil($total_count / $items_per_page))
+                ->with('items_per_page', $items_per_page)
+                ->with('keyword', $keyword)
+                ->with('route_name', 'request.list')
+                ->with('route_params', [
+                    'items_per_page' => $items_per_page,
+                ])
+            );
     }
 }

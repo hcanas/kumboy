@@ -15,16 +15,17 @@ class CreateStoreApplicationRequestsTable extends Migration
     {
         Schema::create('store_application_requests', function (Blueprint $table) {
             $table->id();
-            $table->string('request_code');
+            $table->string('ref_no');
             $table->unsignedBigInteger('store_id')->nullable();
             $table->string('name');
             $table->string('contact_number');
-            $table->string('address');
+            $table->string('address_line');
             $table->string('map_coordinates');
             $table->string('map_address');
             $table->date('open_until');
             $table->string('attachment');
 
+            $table->foreign('ref_no')->references('ref_no')->on('store_requests');
             $table->engine = 'InnoDB';
         });
     }

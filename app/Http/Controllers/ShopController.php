@@ -16,7 +16,7 @@ class ShopController extends DatabaseController
         return redirect()
             ->route('shop', [
                 'current_page' => 1,
-                'items_per_page' => 12,
+                'items_per_page' => 32,
                 'price_from' => $request->get('price_from') ?? 0,
                 'price_to' => $request->get('price_to') ?? 1000000,
                 'main_category' => $category[0] ?? 'all',
@@ -30,7 +30,7 @@ class ShopController extends DatabaseController
     public function index(
         Request $request,
         $current_page = 1,
-        $items_per_page = 12,
+        $items_per_page = 32,
         $price_from = 0,
         $price_to = 1000000,
         $main_category = 'all',

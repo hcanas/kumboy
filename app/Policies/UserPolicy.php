@@ -9,27 +9,17 @@ class UserPolicy
 {
     use HandlesAuthorization;
 
-    public function viewAll(User $user, User $target)
+    public function list(User $user, User $target)
     {
         return in_array(strtolower($user->role), ['superadmin', 'admin']);
     }
 
-    public function viewAccountSettings(User $user, User $target)
+    public function update(User $user, User $target)
     {
         return $user->id === $target->id;
     }
 
-    public function changeName(User $user, User $target)
-    {
-        return $user->id === $target->id;
-    }
-
-    public function changePassword(User $user, User $target)
-    {
-        return $user->id === $target->id;
-    }
-
-    public function banUser(User $user, User $target)
+    public function restrict(User $user, User $target)
     {
         // only ban active users
         // superadmin cannot be banned

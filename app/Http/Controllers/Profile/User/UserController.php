@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Profile\User;
 
+use App\Events\GenericUserActivity;
 use App\Events\UserChangeName;
 use App\Events\UserChangePassword;
+use App\Models\User;
 use App\Services\MailService;
 use App\Services\VerificationService;
 use App\Traits\Validation\HasUserValidation;
@@ -16,18 +18,16 @@ class UserController extends ProfileController
 {
     use HasUserValidation;
 
-    public function showAccountSettings($id)
+    public function showSettings($id)
     {
-        $this->authorize('viewAccountSettings', $this->user);
+        $this->authorize('update', $this->user);
 
-        return $this->profile
-            ->with('content', 'users.profile.account_settings.index')
-            ->with('contentData', ['user' => $this->user]);
+        return view('pages.user.account.settings');
     }
 
     public function changeName($id, Request $request)
     {
-        $this->authorize('changeName', $this->user);
+        $this->authorize('update', $this->user);
 
         $validated_data = $request->validate($this->getUserRules(['name']));
 
@@ -38,7 +38,7 @@ class UserController extends ProfileController
             $this->user->update(['name' => $validated_data['name']]);
 
             if ($this->user->wasChanged()) {
-                event(new UserChangeName($this->user, $oldName));
+                event(new GenericUserActivity('Changed name from '.$oldName.' to '.$this->user->name.'.'));
             }
 
             $this->commit();
@@ -65,7 +65,7 @@ class UserController extends ProfileController
         MailService $mail_service
     ) {
         if ($request->wantsJson()) {
-            $gate = Gate::inspect('changePassword', $this->user);
+            $gate = Gate::inspect('update', $this->user);
 
             if ($gate->allowed()) {
                 try {
@@ -96,7 +96,7 @@ class UserController extends ProfileController
 
     public function changePassword($id, Request $request, VerificationService $verification_service)
     {
-        $this->authorize('changePassword', $this->user);
+        $this->authorize('update', $this->user);
 
         // inject user email to request for verification code validation to work
         $request->merge(['email' => $this->user->email]);
@@ -111,7 +111,7 @@ class UserController extends ProfileController
 
             if ($verification_service->consumeVerificationCode($this->user->email, $validated_data['verification_code'])) {
                 $this->user->update(['password' => Hash::make($validated_data['password'])]);
-                event(new UserChangePassword($this->user));
+                event(new GenericUserActivity('Changed password.'));
                 $this->commit();
 
                 return back()

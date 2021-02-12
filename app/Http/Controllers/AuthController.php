@@ -1,12 +1,10 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Events\UserLogin;
-use App\Events\UserLogout;
+use App\Events\GenericUserActivity;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -14,7 +12,7 @@ class AuthController extends DatabaseController
 {
     public function showLoginForm()
     {
-        return view('auth.login_form');
+        return view('pages.auth.login');
     }
 
     public function login(Request $request)
@@ -37,7 +35,7 @@ class AuthController extends DatabaseController
             }
 
             Auth::login($user);
-            event(new UserLogin($user));
+            event(new GenericUserActivity('Logged in.'));
 
             $this->commit();
 
@@ -56,7 +54,7 @@ class AuthController extends DatabaseController
         try {
             $this->beginTransaction();
 
-            event(new UserLogout(Auth::user()));
+            event(new GenericUserActivity('Logged out.'));
             Auth::logout();
 
             $this->commit();
@@ -79,31 +77,30 @@ class AuthController extends DatabaseController
     public function handleGoogleCallback()
     {
         try {
-            $user = Socialite::driver('google')->user();
+            $this->beginTransaction();
 
-            $existing_user = User::query()
-                ->where('email', $user->getEmail())
+            $google_user = Socialite::driver('google')->user();
+
+            $user = User::query()
+                ->where('email', $google_user->getEmail())
                 ->first();
 
-            if ($existing_user === null) {
-                $new_user = User::query()
+            if ($user === null) {
+                $user = User::query()
                     ->create([
-                        'name' => $user->getName(),
-                        'email' => $user->getEmail(),
+                        'name' => $google_user->getName(),
+                        'email' => $google_user->getEmail(),
                         'email_verified_at' => now(),
                         'password' => Hash::make(bin2hex(random_bytes(8))),
                         'role' => 'user',
                     ]);
-
-                event(new UserLogin($new_user));
-
-                Auth::login($new_user);
-            } else {
-                event(new UserLogin($existing_user));
-                Auth::login($existing_user);
             }
 
-            return redirect('/');
+            Auth::login($user);
+            event(new GenericUserActivity('Logged in via google.'));
+            $this->commit();
+
+            return redirect()->route('home');
         } catch (\Exception $e) {
             logger($e);
             return redirect('/login')

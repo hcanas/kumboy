@@ -47,7 +47,7 @@
                         'total_pages' => $total_pages,
                         'items_per_page' => $items_per_page,
                         'keyword' => $keyword,
-                        'url' => route('user.view-all'),
+                        'url' => route('user.list'),
                     ])
                 @endif
             </div>

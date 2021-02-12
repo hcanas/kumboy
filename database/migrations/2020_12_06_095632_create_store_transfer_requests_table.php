@@ -15,11 +15,12 @@ class CreateStoreTransferRequestsTable extends Migration
     {
         Schema::create('store_transfer_requests', function (Blueprint $table) {
             $table->id();
-            $table->string('request_code');
+            $table->string('ref_no');
             $table->unsignedBigInteger('store_id');
             $table->unsignedBigInteger('target_id');
             $table->string('attachment');
 
+            $table->foreign('ref_no')->references('ref_no')->on('store_requests');
             $table->engine = 'InnoDB';
         });
     }

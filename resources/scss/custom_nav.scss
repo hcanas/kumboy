@@ -1,0 +1,11 @@
+.profile {
+  .profile-sidebar {
+    .nav-link {
+      &:hover,
+      &:focus {
+        border-bottom: $primary 0.15rem solid;
+        padding-bottom: 0.35rem;
+      }
+    }
+  }
+}

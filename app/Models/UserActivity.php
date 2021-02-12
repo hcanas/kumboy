@@ -16,6 +16,7 @@ class UserActivity extends Model
         'user_id',
         'date_recorded',
         'action_taken',
+        'category',
     ];
 
     protected $casts = [

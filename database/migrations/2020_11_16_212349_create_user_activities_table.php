@@ -19,6 +19,7 @@ class CreateUserActivitiesTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->dateTime('date_recorded');
             $table->text('action_taken');
+            $table->string('category');
 
             $table->foreign('user_id')->references('id')->on('users');
             $table->engine = 'InnoDB';

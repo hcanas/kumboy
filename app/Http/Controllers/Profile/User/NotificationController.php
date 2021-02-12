@@ -6,13 +6,13 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends ProfileController
 {
-    public function searchNotification($user_id, Request $request)
+    public function search($user_id, Request $request)
     {
         return redirect()
             ->route('user.notifications', [$user_id, 1, 15, $request->get('keyword')]);
     }
 
-    public function viewAll($user_id, $current_page = 1, $items_per_page = 12, $keyword = null)
+    public function list($user_id, $current_page = 1, $items_per_page = 12, $keyword = null)
     {
         if (Auth::user()->id !== $this->user->id) {
             abort(403);
@@ -31,22 +31,26 @@ class NotificationController extends ProfileController
             ->take($items_per_page)
             ->get();
 
-        return $this->profile
-            ->with('content', 'users.profile.notifications.index')
-            ->with('contentData', [
-                'user' => $this->user,
-                'notifications' => $notifications,
-                'item_start' => $offset + 1,
-                'item_end' => $notifications->count() + $offset,
-                'total_count' => $total_count,
-                'current_page' => $current_page,
-                'total_pages' => ceil($total_count / $items_per_page),
-                'items_per_page' => $items_per_page,
-                'keyword' => $keyword,
-            ]);
+        return view('pages.user.notification.list')
+            ->with('notifications', $notifications)
+            ->with('keyword', $keyword)
+            ->with('pagination', view('shared.pagination')
+                ->with('item_start', $offset + 1)
+                ->with('item_end', $notifications->count() + $offset)
+                ->with('total_count', $total_count)
+                ->with('current_page', $current_page)
+                ->with('total_pages', ceil($total_count / $items_per_page))
+                ->with('items_per_page', $items_per_page)
+                ->with('keyword', $keyword)
+                ->with('route_name', 'user.notifications')
+                ->with('route_params', [
+                    'id' => $user_id,
+                    'items_per_page' => $items_per_page,
+                ])
+            );
     }
 
-    public function readNotification($user_id, $notif_id)
+    public function read($user_id, $notif_id)
     {
         if (Auth::user()->id !== $this->user->id) {
             abort(403);
@@ -59,33 +63,9 @@ class NotificationController extends ProfileController
         }
 
         try {
-            $this->beginTransaction();
-
             $notification->markAsRead();
-
-            switch ($notification->data['type']) {
-                case 'store_request':
-                    $redirect = redirect()
-                        ->route('user.store-request-details', [
-                            $notification->data['user_id'],
-                            $notification->data['code']
-                        ]);
-                    break;
-                case 'store_received':
-                    $redirect = redirect()
-                        ->route('store.products', $notification->data['store_id']);
-                    break;
-                case 'order':
-                    $redirect = redirect()
-                        ->route('user.store-order-details', [$user_id, $notification->data['tracking_number']]);
-                    break;
-            }
-
-            $this->commit();
-
-            return $redirect;
+            return $this->view($user_id, $notif_id);
         } catch (\Exception $e) {
-            $this->rollback();
             logger($e);
             return back()
                 ->with('message_type', 'danger')
@@ -93,7 +73,7 @@ class NotificationController extends ProfileController
         }
     }
 
-    public function viewNotification($user_id, $notif_id)
+    public function view($user_id, $notif_id)
     {
         if (Auth::user()->id !== $this->user->id) {
             abort(403);
@@ -105,21 +85,15 @@ class NotificationController extends ProfileController
             abort(404);
         }
 
-        switch ($notification->data['type']) {
-            case 'store_request':
+        switch ($notification->data['category']) {
+            case 'new_store':
+            case 'update_store':
+            case 'store_transfer':
                 $redirect = redirect()
                     ->route('user.store-request-details', [
                         $notification->data['user_id'],
-                        $notification->data['code']
+                        $notification->data['ref_no']
                     ]);
-                break;
-            case 'store_received':
-                $redirect = redirect()
-                    ->route('store.products', $notification->data['store_id']);
-                break;
-            case 'order':
-                $redirect = redirect()
-                    ->route('user.store-order-details', [$user_id, $notification->data['tracking_number']]);
                 break;
         }
 
