@@ -1,6 +1,13 @@
 node_modules
 vendor
-storage
+storage/app/public/products/images/original/*.jpeg
+storage/app/public/products/images/preview/*.jpeg
+storage/app/public/products/images/thumbnail/*.jpeg
+storage/app/public/stores/attachments
+storage/app/public/stores/logos/*.jpeg
+storage/app/public/stores/logos/*.png
+storage/framework/views/*.php
+storage/logs/*.log
 .idea
 .env
 .vscode
