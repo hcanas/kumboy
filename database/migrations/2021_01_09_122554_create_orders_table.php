@@ -19,7 +19,7 @@ class CreateOrdersTable extends Migration
             $table->string('tracking_number')->unique();
             $table->string('contact_person');
             $table->string('contact_number');
-            $table->string('address');
+            $table->string('address_line');
             $table->string('map_address');
             $table->string('map_coordinates');
             $table->string('voucher_code')->nullable();

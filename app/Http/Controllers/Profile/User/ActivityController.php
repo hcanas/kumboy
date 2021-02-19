@@ -34,7 +34,7 @@ class ActivityController extends ProfileController
         return view('pages.user.activity.list')
             ->with('activities', $activities)
             ->with('keyword', $keyword)
-            ->with('pagination', view('shared.pagination')
+            ->with('pagination', view('partials.pagination')
                 ->with('item_start', $offset + 1)
                 ->with('item_end', $activities->count() + $offset)
                 ->with('total_count', $total_count)

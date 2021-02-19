@@ -17,7 +17,6 @@ class CreateProductImagesTable extends Migration
             $table->id();
             $table->unsignedBigInteger('product_id');
             $table->string('filename');
-            $table->softDeletes();
 
             $table->foreign('product_id')->references('id')->on('products');
             $table->engine = 'InnoDB';

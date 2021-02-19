@@ -38,7 +38,7 @@ class StoreFactory extends Factory
             'user_id' => $user->id,
             'name' => ucwords($this->faker->words(3, true)),
             'contact_number' => '0909'.rand(0000000, 9999999),
-            'address' => $this->faker->address,
+            'address_line' => $this->faker->address,
             'map_coordinates' => $coordinates,
             'map_address' => 'undefined',
             'open_until' => $this->faker->dateTimeBetween('now', '+2 years'),

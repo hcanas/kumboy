@@ -4,8 +4,8 @@
 @section('profile-content')
     <div class="row">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center border-bottom mt-3 mb-1 pb-2">
-                <h4 class="my-0">Notifications</h4>
+            <div class="d-flex justify-content-between align-items-center my-3">
+                <h4 class="text-black-50 my-0">Notifications</h4>
                 <form action="{{ route('user.search-notification', $user->id) }}" METHOD="POST">
                     @csrf
                     <div class="input-group">

@@ -13,16 +13,28 @@ class AddressBookController extends ProfileController
 {
     use HasUserAddressValidation;
 
-    public function list($user_id)
+    public function list(Request $request, $user_id)
     {
-        $this->authorize('manage', [new UserAddressBook(), $user_id]);
+        $gate = Gate::inspect('manage', [new UserAddressBook(), $user_id]);
 
-        $address_book = UserAddressBook::query()
-            ->where('user_id', $user_id)
-            ->get();
+        if ($gate->allowed()) {
+            $address_book = UserAddressBook::query()
+                ->where('user_id', $user_id)
+                ->get();
 
-        return view('pages.user.address.list')
-            ->with('list', $address_book);
+            if ($request->wantsJson()) {
+                return response()->json($address_book);
+            } else {
+                return view('pages.user.address.list')
+                    ->with('list', $address_book);
+            }
+        } else {
+            if ($request->wantsJson()) {
+                return response()->json('Forbidden.', 403);
+            } else {
+                abort(403);
+            }
+        }
     }
 
     public function save($user_id, Request $request, MapService $map_service)

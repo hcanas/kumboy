@@ -160,8 +160,42 @@
                 <div class="modal-body">
                     <div id="form_message"></div>
 
+                    <div id="address_list">
+                        <div class="bg-light p-1 my-1 d-none" id="item_template">
+                            <div class="d-flex align-items-center">
+                                <i class="material-icons fs-16">label</i>
+                                <span class="ms-1 item_label"></span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="material-icons fs-16">person</i>
+                                <span class="ms-1 item_contact_person"></span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="material-icons fs-16">textsms</i>
+                                <span class="ms-1 item_contact_number"></span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="material-icons fs-16">house</i>
+                                <span class="ms-1 item_address_line"></span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="material-icons fs-16">map</i>
+                                <span class="ms-1 item_map_address"></span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="material-icons fs-16">place</i>
+                                <span class="ms-1 item_map_coordinates"></span>
+                            </div>
+                            <div class="my-1">
+                                <button type="button" class="btn btn-outline-dark btn-sm copy_address">
+                                    COPY ADDRESS
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <form id="form_set_address">
-                        <div class="mb-3">
+                        <div class="my-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="material-icons fs-14">person</i></span>
                                 <input type="text" class="form-control form-select-sm" name="contact_person" placeholder="Contact Person">
@@ -642,6 +676,7 @@
             }
 
             el_modal_set_address.addEventListener('show.bs.modal', e => {
+                el_modal_set_address.querySelector('#form_message').textContent = '';
                 el_modal_set_address.querySelector('#form_message').removeAttribute('class');
                 el_modal_set_address.querySelectorAll('.field_error').forEach(field => field.textContent = '');
                 setModalAddress(summary_address);
@@ -716,6 +751,42 @@
                     [gmap_lat, gmap_lng] = address.map_coordinates.split(',').map(x => parseFloat(x));
                     setGmapMarker(gmap_lat, gmap_lng);
                 }
+            }
+
+            if (is_logged_in) {
+                axios.get('/users/{{ Auth::id() }}/address-book')
+                    .then(response => {
+                        const items = response.data;
+
+                        if (items.length > 0) {
+                            const el_address_list = el_modal_set_address.querySelector('#address_list');
+                            const el_item_template = el_modal_set_address.querySelector('#item_template');
+
+                            items.forEach(item => {
+                                const template_copy = el_item_template.cloneNode(true);
+                                template_copy.classList.remove('d-none');
+                                template_copy.removeAttribute('id');
+
+                                template_copy.querySelector('.item_label').textContent = item.label;
+                                template_copy.querySelector('.item_contact_person').textContent = item.contact_person;
+                                template_copy.querySelector('.item_contact_number').textContent = item.contact_number;
+                                template_copy.querySelector('.item_address_line').textContent = item.address_line;
+                                template_copy.querySelector('.item_map_address').textContent = item.map_address;
+                                template_copy.querySelector('.item_map_coordinates').textContent = item.map_coordinates;
+
+                                template_copy.querySelector('.copy_address').addEventListener('click', e => {
+                                    setModalAddress(item);
+                                    el_modal_set_address.querySelector('form').scrollIntoView({behavior: 'smooth'});
+                                });
+
+                                el_address_list.insertAdjacentElement('beforeend', template_copy);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        el_modal_set_address.querySelector('#form_message').textContent = error.response.data;
+                        el_modal_set_address.querySelector('#form_message').setAttribute('class', 'alert alert-danger small');
+                    });
             }
         } else {
             showEmptyCart();

@@ -2,23 +2,25 @@
 @section('page-title', 'Products')
 
 @section('content')
-    <div class="container mt-3">
+    <div class="container">
+        <div class="row my-3">
+            <div class="col-12 my-0">
+                <h3 class="text-center text-lg-start text-black-50 fw-bolder">SHOP</h3>
+            </div>
+        </div>
         <div class="row">
-            <div class="col-12">
-                <div class="d-flex flex-column flex-lg-row justify-content-lg-between align-items-lg-end border-bottom my-2">
-                    <h4>Shop</h4>
-                    <div class="my-2">
-                        @php
-                            echo $product_filter;
-                        @endphp
-                    </div>
-                </div>
+            <div class="col-12 col-lg-3 bg-white p-3">
+                @php
+                    echo $product_filter;
+                @endphp
+            </div>
+            <div class="col-12 col-lg-9 bg-white p-3">
                 @if ($products->isEmpty())
                     <div class="alert alert-danger">No records found.</div>
                 @else
-                    <div class="row row-cols-3 row-cols-md-4 row-cols-lg-auto gx-1 gx-lg-2 gy-2 g-lg-2 px-lg-2 px-xxl-3">
+                    <div class="row row-cols-3 row-cols-md-4 row-cols-lg-6 gx-1">
                         @foreach ($products AS $product)
-                            <div class="col">
+                            <div class="col mb-2">
                                 <a href="{{ route('product.info', $product->id) }}" class="card-link-wrapper">
                                     <div class="card product-listing h-100">
                                         <img src="{{ asset('storage/products/images/preview/'.($product->preview ?? 'placeholder.jpg')) }}" class="card-img-top">

@@ -1,12 +1,12 @@
 @extends('pages.user.profile')
-@section('page_title', $user->name.' - Request Details')
+@section('page-title', $user->name.' - '.$request->ref_no.' Request Details')
 
 @section('profile-content')
-    <div class="d-flex flex-column align-items-center flex-lg-row justify-content-lg-between border-bottom mt-3 mb-2 pb-2">
-        <h4>
+    <div class="d-flex flex-column align-items-center flex-lg-row justify-content-lg-between my-3">
+        <h4 class="text-black-50 my-0">
             {{ ucwords(str_replace('_', ' ', $request->category)).' Application' }}
         </h4>
-        <span class="text-muted">
+        <span class="text-black-50">
             {{ $request->ref_no }} &ndash; {{ date('M j, Y h:iA', strtotime($request->created_at)) }}
         </span>
     </div>

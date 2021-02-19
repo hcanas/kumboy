@@ -5,7 +5,7 @@
     @can('update', $user)
         <div class="row">
             <div class="col-12">
-                <h4 class="border-bottom mt-3 mb-0 pb-2">Account Settings</h4>
+                <h4 class="text-black-50 my-3">Account Settings</h4>
 
                 @if (session('message_type'))
                     <div class="alert alert-{{ session('message_type') }} small mt-2">{{ session('message_content') }}</div>
@@ -73,13 +73,13 @@
                     <button type="submit" class="btn btn-primary btn-sm">Change Password</button>
                 </form>
 
-                <h6 class="border-bottom mt-3 pb-2">Roles</h6>
+                <h6 class="border-bottom mt-3 pb-2">Role</h6>
                 <p><span class="badge rounded-pill bg-dark text-white p-2">{{ ucfirst(str_replace('-', ' ', $user->role)) }}</span></p>
             </div>
         </div>
 
         <script>
-            var btnSendCode = document.getElementById('send-code');
+            const btnSendCode = document.getElementById('send-code');
 
             btnSendCode.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -88,10 +88,10 @@
                     .then(function (response) {
                         console.log(response.data);
                         // disable button for 60 seconds
-                        var btn = document.getElementById('send-code');
+                        const btn = document.getElementById('send-code');
                         btn.disabled = true;
 
-                        var ctr = 60;
+                        let ctr = 60;
                         timer();
 
                         function timer() {
@@ -108,7 +108,7 @@
                         }
                     })
                     .catch(function (error) {
-                        var errorMessage = '<div class="alert alert-danger" id="email_error">' + error.response.data + '</div>';
+                        const errorMessage = '<div class="alert alert-danger" id="email_error">' + error.response.data + '</div>';
                         document.getElementById('change-password-form').insertAdjacentHTML('afterbegin', errorMessage);
                     });
             });

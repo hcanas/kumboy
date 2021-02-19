@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container h-100">
-        <div class="row d-flex align-items-stretch mt-3 profile">
+        <div class="row d-flex align-items-stretch mt-lg-5 bg-white profile">
             <div class="col-12 col-lg-3 pb-3 text-center profile-sidebar">
                 <h4 class="mt-3">{{ $user->name }}</h4>
                 <p class="small my-0">
@@ -19,9 +19,11 @@
 
                 {{-- Web View --}}
                 <ul class="nav flex-column d-none d-md-block">
-                    <li class="nav-item">
-                        <a class="nav-link px-0" href="{{ route('user.activity-log', $user->id) }}">Activity Log</a>
-                    </li>
+                    @can('list', [new \App\Models\UserActivity(), $user->id])
+                        <li class="nav-item">
+                            <a class="nav-link px-0" href="{{ route('user.activity-log', $user->id) }}">Activity Log</a>
+                        </li>
+                    @endcan
                     @can('update', $user)
                         <li class="nav-item">
                             <a class="nav-link px-0" href="{{ route('user.account-settings', $user->id) }}">Account Settings</a>

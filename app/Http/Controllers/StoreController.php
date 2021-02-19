@@ -18,31 +18,23 @@ class StoreController extends Controller
     {
         $offset = ($current_page - 1) * $items_per_page;
 
-        if (Cache::tags(['stores', $request->url()])->has('data')) {
-            $stores = Cache::tags(['stores', $request->url()])->get('data');
-            $total_count = Cache::tags(['stores', $request->url()])->get('count');
-        } else {
-            $stores = Store::query();
+        $stores = Store::query();
 
-            if (!empty($keyword)) {
-                $stores->whereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', [$keyword.'*']);
-            }
-
-            $total_count = $stores->count();
-
-            $stores = $stores
-                ->addSelect(['user_name' => User::query()
-                    ->whereColumn('id', 'stores.user_id')
-                    ->select('name')
-                    ->limit(1)
-                ])
-                ->skip($offset)
-                ->take($items_per_page)
-                ->get();
-
-            Cache::tags(['stores', $request->url()])->put('data', $stores);
-            Cache::tags(['stores', $request->url()])->put('count', $total_count);
+        if (!empty($keyword)) {
+            $stores->whereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', [$keyword.'*']);
         }
+
+        $total_count = $stores->count();
+
+        $stores = $stores
+            ->addSelect(['user_name' => User::query()
+                ->whereColumn('id', 'stores.user_id')
+                ->select('name')
+                ->limit(1)
+            ])
+            ->skip($offset)
+            ->take($items_per_page)
+            ->get();
 
         return view('pages.store.list')
             ->with('stores', $stores)

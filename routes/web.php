@@ -166,12 +166,8 @@ Route::prefix('stores')->group(function () {
             .'/{keyword?}',
             [StoreProductController::class, 'index']
         )->name('store.products');
-        Route::get('add-product', [StoreProductController::class, 'showAddProductForm'])
+        Route::post('add-product', [StoreProductController::class, 'create'])
             ->name('store.add-product');
-        Route::post('add-product', [StoreProductController::class, 'addProduct']);
-        Route::get('edit-product/{sub_id}', [StoreProductController::class, 'showEditProductForm'])
-            ->name('store.edit-product');
-        Route::post('edit-product/{sub_id}', [StoreProductController::class, 'updateProduct']);
     });
 });
 
@@ -201,6 +197,8 @@ Route::prefix('products')->group(function () {
     Route::prefix('{id}')->group(function () {
         Route::get('info', [ProductProfileController::class, 'index'])
             ->name('product.info');
+        Route::post('edit', [ProductProfileController::class, 'update'])
+            ->name('product.edit');
     });
 });
 

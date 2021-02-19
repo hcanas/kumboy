@@ -1,12 +1,14 @@
-<form class="row row-cols-lg-auto gx-2 align-items-end" action="{{ $url }}" method="POST">
+<div class="mb-3">FILTER PRODUCTS</div>
+
+<form action="{{ $url }}" method="POST">
     @csrf
 
-    <div class="col-12">
+    <div class="my-1">
         <input type="search" name="keyword" class="form-control form-control-sm" value="{{ $filters['keyword'] ?? '' }}" placeholder="Search keyword...">
     </div>
 
-    <div class="col-12">
-        <label>Categories</label>
+    <div class="my-1">
+        <label class="text-muted small">CATEGORY</label>
         <select name="category" class="form-select form-select-sm">
             <option value="all|all"
                     {{ (isset($filters['main_category'], $filters['sub_category']) AND $filters['main_category'] === 'all' AND $filters['sub_category'] === 'all') ? 'selected' : '' }}
@@ -29,17 +31,17 @@
         </select>
     </div>
 
-    <div class="col-12">
-        <label>Price</label>
+    <div class="my-1">
+        <label class="text-muted small">PRICE</label>
         <div class="d-flex align-items-center">
             <input type="number" name="price_from" class="form-control form-control-sm" value="{{ $filters['price_from'] ?? 0 }}" min="0" max="1000000" step="0.01">
-            <span class="mx-2">to</span>
+            <span class="mx-1">&ndash;</span>
             <input type="number" name="price_to" class="form-control form-control-sm" value="{{ $filters['price_to'] ?? 1000000 }}" min="0" max="1000000" step="0.01">
         </div>
     </div>
 
-    <div class="col-12">
-        <label>Sort By</label>
+    <div class="my-1">
+        <label class="text-muted small">SORT BY</label>
         <select name="sort" class="form-select form-select-sm">
             <option value="sold|desc" {{ (isset($filters['sort_by'], $filters['sort_dir']) AND $filters['sort_by'] === 'sold' AND $filters['sort_dir'] === 'desc') ? 'selected' : '' }}>Best Sellers</option>
             <option value="name|asc" {{ (isset($filters['sort_by'], $filters['sort_dir']) AND $filters['sort_by'] === 'name' AND $filters['sort_dir'] === 'asc') ? 'selected' : '' }}>Name A-Z</option>
@@ -49,10 +51,12 @@
         </select>
     </div>
 
-    <div class="col d-grid d-block d-lg-inline mt-3 mt-lg-0">
-        <a href="{{ route('shop') }}" class="btn btn-outline-dark btn-sm">Reset</a>
-    </div>
-    <div class="col d-grid d-block d-lg-inline mt-3 mt-lg-0">
-        <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+    <div class="row my-3">
+        <div class="col d-grid d-block">
+            <a href="{{ route('shop') }}" class="btn btn-outline-dark btn-sm">RESET</a>
+        </div>
+        <div class="col d-grid d-block">
+            <button type="submit" class="btn btn-primary btn-sm">APPLY</button>
+        </div>
     </div>
 </form>

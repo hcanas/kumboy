@@ -4,8 +4,8 @@
 @section('profile-content')
     <div class="row">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center border-bottom mt-3 mb-2 pb-2">
-                <h4 class="my-0">Stores</h4>
+            <div class="d-flex justify-content-between align-items-center my-3">
+                <h4 class="text-black-50 my-0">Stores</h4>
                 <div class="text-end">
                     @can('listOwn', [new \App\Models\StoreRequest(), $user->id])
                         <a class="btn btn-primary btn-sm" href="{{ route('user.store-requests',  $user->id) }}">
@@ -632,6 +632,11 @@
                             template_copy.querySelector('.edit_store').addEventListener('click', e => {
                                 e.preventDefault();
                                 showEditStoreModal(data.store_id);
+                            });
+
+                            template_copy.querySelector('.transfer_store').addEventListener('click', e => {
+                                e.preventDefault();
+                                showTransferStoreModal(data.store_id);
                             });
 
                             el_store_list.insertAdjacentElement('afterbegin', template_copy);

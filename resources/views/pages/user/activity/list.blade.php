@@ -4,8 +4,8 @@
 @section('profile-content')
     <div class="row">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center border-bottom mt-3 mb-1 pb-2">
-                <h4 class="my-0">Activity Log</h4>
+            <div class="d-flex justify-content-between align-items-center my-3">
+                <h4 class="text-black-50 my-0">Activity Log</h4>
                 <form action="{{ route('user.search-activity', $user->id) }}" METHOD="POST">
                     @csrf
                     <div class="input-group">
@@ -50,6 +50,50 @@
                                     );
                                 @endphp
                                 @break
+                            @case('new_product')
+                            @case('update_product')
+                                @php
+                                    $product_id_raw = substr($activity->action_taken,
+                                        strpos($activity->action_taken, '<product_id>'),
+                                        strpos($activity->action_taken, '</product_id>')
+                                            - strpos($activity->action_taken, '<product_id>')
+                                            + 13,
+                                    );
+
+                                    $product_id = str_replace(['<product_id>', '</product_id>'], '', $product_id_raw);
+
+                                    $store_id_raw = substr($activity->action_taken,
+                                        strpos($activity->action_taken, '<store_id>'),
+                                        strpos($activity->action_taken, '</store_id>')
+                                            - strpos($activity->action_taken, '<store_id>')
+                                            + 11,
+                                    );
+
+                                    $store_id = str_replace(['<store_id>', '</store_id>'], '', $store_id_raw);
+
+                                    $activity->action_taken = str_replace(
+                                        [
+                                            '<product_name>',
+                                            '</product_name>',
+                                            '<store_name>',
+                                            '</store_name>',
+                                            $product_id_raw,
+                                            $store_id_raw
+                                        ],
+                                        [
+                                            '<a href="'.route('product.info', $product_id).'">',
+                                            '</a>',
+                                            '<a href="'.route('store.products', $store_id).'">',
+                                            '</a>',
+                                            '',
+                                            ''
+                                        ],
+                                        $activity->action_taken
+                                    );
+
+                                    echo $activity->action_taken;
+                                @endphp
+                                @break;
                         @endswitch
                         <span class="small text-muted">&ndash; {{ date('M j, Y h:iA', strtotime($activity->date_recorded)) }}</span>
                     </p>

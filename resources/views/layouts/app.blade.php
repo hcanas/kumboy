@@ -15,7 +15,7 @@
 
     <title>@yield('page-title')</title>
 </head>
-<body>
+<body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-custom bg-white sticky-top">
         <div class="container">
             <a class="navbar-brand" href="{{ route('home') }}">

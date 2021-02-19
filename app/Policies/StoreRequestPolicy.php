@@ -22,7 +22,9 @@ class StoreRequestPolicy
 
     public function view(User $user, StoreRequest $store_request)
     {
-        return $user->id === $store_request->user_id OR in_array(strtolower($user->role), ['superadmin', 'admin']);
+        return $user->id === $store_request->user_id
+            OR ($store_request->category === 'store_transfer' AND $user->id === $store_request->storeTransfer()->first()->target_id)
+            OR in_array(strtolower($user->role), ['superadmin', 'admin']);
     }
 
     public function cancel(User $user, StoreRequest $store_request)

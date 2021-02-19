@@ -16,7 +16,7 @@ class ShopController extends DatabaseController
         return redirect()
             ->route('shop', [
                 'current_page' => 1,
-                'items_per_page' => 32,
+                'items_per_page' => 24,
                 'price_from' => $request->get('price_from') ?? 0,
                 'price_to' => $request->get('price_to') ?? 1000000,
                 'main_category' => $category[0] ?? 'all',
@@ -30,7 +30,7 @@ class ShopController extends DatabaseController
     public function index(
         Request $request,
         $current_page = 1,
-        $items_per_page = 32,
+        $items_per_page = 24,
         $price_from = 0,
         $price_to = 1000000,
         $main_category = 'all',
@@ -41,41 +41,33 @@ class ShopController extends DatabaseController
     ) {
         $offset = ($current_page - 1) * $items_per_page;
 
-        if (Cache::tags(['shop', $request->url()])->has('data')) {
-            $products = Cache::tags(['shop', $request->url()])->get('data');
-            $total_count = Cache::tags(['shop', $request->url()])->get('count');
-        } else {
-            $query = Product::query()
-                ->addSelect(['preview' => ProductImage::query()
-                    ->whereColumn('product_images.product_id', 'products.id')
-                    ->select('filename')
-                    ->limit(1)
-                ]);
+        $query = Product::query()
+            ->addSelect(['preview' => ProductImage::query()
+                ->whereColumn('product_images.product_id', 'products.id')
+                ->select('filename')
+                ->limit(1)
+            ]);
 
-            if (!empty($keyword)) {
-                $query->whereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', [$keyword.'&']);
-            }
-
-            if (!empty($main_category) AND $main_category !== 'all') {
-                $query->where('main_category', $main_category);
-            }
-
-            if (!empty($sub_category) AND $sub_category !== 'all') {
-                $query->where('sub_category', $sub_category);
-            }
-
-            $query->whereBetween('price', [$price_from, $price_to]);
-
-            $total_count = $query->count();
-
-            $products = $query->skip($offset)
-                ->take($items_per_page)
-                ->orderBy($sort_by, $sort_dir)
-                ->get();
-
-            Cache::tags(['shop', $request->url()])->put('data', $products);
-            Cache::tags(['shop', $request->url()])->put('count', $total_count);
+        if (!empty($keyword)) {
+            $query->whereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', [$keyword.'&']);
         }
+
+        if (!empty($main_category) AND $main_category !== 'all') {
+            $query->where('main_category', $main_category);
+        }
+
+        if (!empty($sub_category) AND $sub_category !== 'all') {
+            $query->where('sub_category', $sub_category);
+        }
+
+        $query->whereBetween('price', [$price_from, $price_to]);
+
+        $total_count = $query->count();
+
+        $products = $query->skip($offset)
+            ->take($items_per_page)
+            ->orderBy($sort_by, $sort_dir)
+            ->get();
 
         return view('pages.product.shop')
             ->with('products', $products)

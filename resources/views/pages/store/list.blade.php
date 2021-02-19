@@ -2,11 +2,11 @@
 @section('page-title', 'Stores')
 
 @section('content')
-    <div class="container mt-3">
-        <div class="row">
-            <div class="col">
-                <div class="d-flex justify-content-between align-items-center border-bottom my-2 py-2">
-                    <h4 class="my-0">Stores</h4>
+    <div class="container">
+        <div class="row my-3">
+            <div class="col-12 my-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="text-center text-lg-start text-black-50 fw-bolder">STORES</h3>
                     <form action="{{ route('store.search') }}" METHOD="POST">
                         @csrf
                         <div class="input-group">
@@ -15,6 +15,10 @@
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+        <div class="row bg-white p-3">
+            <div class="col">
                 @if ($stores->isEmpty())
                     <div class="alert alert-danger small">No stores found.</div>
                 @else

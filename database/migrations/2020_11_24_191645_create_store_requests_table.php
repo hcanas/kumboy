@@ -29,7 +29,7 @@ class CreateStoreRequestsTable extends Migration
             $table->engine = 'InnoDB';
         });
 
-        DB::statement('ALTER TABLE store_requests ADD FULLTEXT (ref_no, type, status)');
+        DB::statement('ALTER TABLE store_requests ADD FULLTEXT (ref_no, category, status)');
     }
 
     /**

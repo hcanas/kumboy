@@ -6,16 +6,29 @@ use Intervention\Image\Facades\Image;
 
 class ImageService
 {
-    public function make(UploadedFile $image)
+    /**
+     * @param UploadedFile $image
+     * @return bool
+     */
+    public function isValid($image)
     {
         $ext = substr($image->getMimeType(), strpos($image->getMimeType(), '/') + 1);
 
         if (in_array($ext, ['jpeg', 'png']) === false) {
-            return null;
+            return false;
         }
 
         // file size must not exceed 500kb
         if ($image->getSize() / 1024 > 500) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function make(UploadedFile $image)
+    {
+        if (!$this->isValid($image)) {
             return null;
         }
 

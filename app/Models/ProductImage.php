@@ -5,11 +5,10 @@ namespace App\Models;
 use App\Traits\Model\WithoutTimestamps;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductImage extends Model
 {
-    use HasFactory, SoftDeletes, WithoutTimestamps;
+    use HasFactory, WithoutTimestamps;
 
     protected $table = 'product_images';
 

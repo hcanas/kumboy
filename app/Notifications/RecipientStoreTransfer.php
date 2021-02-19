@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Events\AutoAcceptedStoreTransfer;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -16,10 +17,10 @@ class RecipientStoreTransfer extends Notification
     /**
      * Create a new notification instance.
      *
-     * @param \App\Events\AcceptedStoreTransfer $event
+     * @param \App\Events\AcceptedStoreTransfer|AutoAcceptedStoreTransfer $event
      * @return void
      */
-    public function __construct(\App\Events\AcceptedStoreTransfer $event)
+    public function __construct($event)
     {
         $this->event = $event;
     }

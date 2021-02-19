@@ -4,8 +4,8 @@
 @section('profile-content')
     <div class="row">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center border-bottom mt-3 pb-2">
-                <h4 class="my-0">Address Book</h4>
+            <div class="d-flex justify-content-between align-items-center my-3">
+                <h4 class="text-black-50 my-0">Address Book</h4>
                 @if (Auth::user()->id === $user->id)
                     <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal_address">
                         Add Address

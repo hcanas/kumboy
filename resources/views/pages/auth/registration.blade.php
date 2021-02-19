@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-md-4 offset-md-4">
                 <div class="card mt-5">
-                    <div class="card-header bg-white py-3">
+                    <div class="card-header bg-light py-3">
                         <h4 class="card-title text-center">Register</h4>
                     </div>
                     <div class="card-body">

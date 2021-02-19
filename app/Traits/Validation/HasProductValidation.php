@@ -7,8 +7,8 @@ trait HasProductValidation
         'name' => 'required|max:255',
         'category' => 'required|product_category',
         'specifications' => 'required|product_specifications',
-        'qty' => 'required|integer|min:1',
-        'price' => 'required|numeric|min:1',
+        'qty' => 'required|integer|min:0',
+        'price' => 'required|numeric|min:0',
     ];
 
     public function getProductRules(array $fields = [])

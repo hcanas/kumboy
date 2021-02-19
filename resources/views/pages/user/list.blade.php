@@ -3,10 +3,10 @@
 
 @section('content')
     <div class="container">
-        <div class="row">
-            <div class="col-12 col-md-8 offset-md-2">
-                <div class="d-flex justify-content-between align-items-center border-bottom mt-3 mb-1 pb-2">
-                    <h4 class="my-0">Users</h4>
+        <div class="row my-3">
+            <div class="col-12 col-lg-8 offset-lg-2 my-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="text-center text-lg-start text-black-50 fw-bolder">USERS</h3>
                     <form action="{{ route('user.search') }}" METHOD="POST">
                         @csrf
                         <div class="input-group">
@@ -15,6 +15,10 @@
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-lg-8 offset-lg-2 bg-white p-3">
                 @if ($users->isEmpty())
                     <div class="alert alert-danger mt-3">No records found.</div>
                 @else

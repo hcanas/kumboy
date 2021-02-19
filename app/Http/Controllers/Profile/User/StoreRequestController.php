@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Profile\User;
 use App\Events\AcceptedStoreApplication;
 use App\Events\AcceptedStoreTransfer;
 use App\Events\AutoAcceptedStoreApplication;
+use App\Events\AutoAcceptedStoreTransfer;
 use App\Events\CancelledStoreApplication;
 use App\Events\CancelledStoreTransfer;
 use App\Events\RejectedStoreApplication;
@@ -161,6 +162,94 @@ class StoreRequestController extends StoreController
         return $store_request;
     }
 
+    public function createStoreTransfer(Request $request, $user_id)
+    {
+        if ($request->wantsJson()) {
+            $store = Store::query()
+                ->where('user_id', $user_id)
+                ->where('id', $request->get('store_id'))
+                ->first();
+
+            $gate = Gate::inspect('transfer', $store);
+
+            if ($gate->allowed()) {
+                $validator = Validator::make($request->all(), $this->getStoreTransferRules());
+
+                if ($validator->fails()) {
+                    return response()->json($validator->errors(), 400);
+                }
+
+                try {
+                    $this->beginTransaction();
+
+                    $target = User::query()
+                        ->where('email', $validator->validated()['email'])
+                        ->whereNull('banned_until')
+                        ->first();
+
+                    if ($target === null) {
+                        return response()->json('User not found.', 404);
+                    } elseif ($target->id === $store->user_id) {
+                        return response()->json('Unable to transfer store to self.', 400);
+                    }
+
+                    // check for duplicate request
+                    $store_request = StoreRequest::query()
+                        ->where('status', 'pending')
+                        ->whereHas('storeTransfer', function ($query) use ($request) {
+                            $query->where('store_id', $request->get('store_id'));
+                        })
+                        ->first();
+
+                    if ($store_request !== null) {
+                        return response()->json('A pending transfer application for this store already exists.', 409);
+                    }
+
+                    // reference number date + user_id + last 4 digit unix timestamp
+                    $ref_no = date('Ymd').$this->user->id.substr(strtotime('now'), -4);
+                    $is_admin = in_array(Auth::user()->role, ['superadmin', 'admin']);
+
+                    $store_request = StoreRequest::query()
+                        ->create([
+                            'user_id' => $user_id,
+                            'ref_no' => $ref_no,
+                            'category' => 'store_transfer',
+                            'status' => $is_admin ? 'accepted' : 'pending',
+                            'evaluated_by' => $is_admin ? Auth::id() : null,
+                        ]);
+
+                    $store_transfer = StoreTransfer::query()
+                        ->create([
+                            'ref_no' => $ref_no,
+                            'store_id' => $store->id,
+                            'target_id' => $target->id,
+                            'attachment' => $ref_no.'.pdf',
+                        ]);
+
+                    $request->file('attachment')->move(storage_path('app/public/stores/attachments'), $ref_no.'.pdf');
+
+                    if ($is_admin) {
+                        $store_transfer->user_id = $user_id;
+                        parent::transfer($user_id, $store_transfer->store_id, $store_transfer->target_id);
+                        event(new AutoAcceptedStoreTransfer($store_request, $store_transfer, $store));
+                    } else {
+                        event(new \App\Events\StoreTransfer($store_request, $store_transfer, $store));
+                    }
+
+                    $this->commit();
+
+                    return response()->json($store_request);
+                } catch (\Exception $e) {
+                    $this->rollback();
+                    logger($e);
+                    return response()->json('Unable to transfer store. Try again later.', 500);
+                }
+            } else {
+                return response()->json('Forbidden.', 403);
+            }
+        }
+    }
+
     public function search($user_id, Request $request)
     {
         return redirect()
@@ -204,7 +293,7 @@ class StoreRequestController extends StoreController
         return view('pages.user.store.request.list')
             ->with('requests', $requests)
             ->with('keyword', $keyword)
-            ->with('pagination', view('shared.pagination')
+            ->with('pagination', view('partials.pagination')
                 ->with('item_start', $offset + 1)
                 ->with('item_end', $requests->count() + $offset)
                 ->with('total_count', $total_count)
@@ -410,87 +499,6 @@ class StoreRequestController extends StoreController
                     $this->rollback();
                     logger($e);
                     return response()->json('Unable to perform action. Try again later.', 500);
-                }
-            } else {
-                return response()->json('Forbidden.', 403);
-            }
-        }
-    }
-
-    public function createStoreTransfer(Request $request, $user_id)
-    {
-        if ($request->wantsJson()) {
-            $store = Store::query()
-                ->where('user_id', $user_id)
-                ->where('id', $request->get('store_id'))
-                ->first();
-
-            $gate = Gate::inspect('transfer', $store);
-
-            if ($gate->allowed()) {
-                $validator = Validator::make($request->all(), $this->getStoreTransferRules());
-
-                if ($validator->fails()) {
-                    return response()->json($validator->errors(), 400);
-                }
-
-                try {
-                    $this->beginTransaction();
-
-                    $target = User::query()
-                        ->where('email', $validator->validated()['email'])
-                        ->whereNull('banned_until')
-                        ->first();
-
-                    if ($target === null) {
-                        return response()->json('User not found.', 404);
-                    } elseif ($target->id === $store->user_id) {
-                        return response()->json('Unable to transfer store to self.', 400);
-                    }
-
-                    // check for duplicate request
-                    $store_request = StoreRequest::query()
-                        ->where('status', 'pending')
-                        ->whereHas('storeTransfer', function ($query) use ($request) {
-                            $query->where('store_id', $request->get('store_id'));
-                        })
-                        ->first();
-
-                    if ($store_request !== null) {
-                        return response()->json('A pending transfer application for this store already exists.', 409);
-                    }
-
-                    // reference number date + user_id + last 4 digit unix timestamp
-                    $ref_no = date('Ymd').$this->user->id.substr(strtotime('now'), -4);
-
-                    $store_request = StoreRequest::query()
-                        ->create([
-                            'user_id' => $user_id,
-                            'ref_no' => $ref_no,
-                            'category' => 'store_transfer',
-                            'status' => 'pending',
-                            'evaluated_by' => null,
-                        ]);
-
-                    $store_transfer = StoreTransfer::query()
-                        ->create([
-                            'ref_no' => $ref_no,
-                            'store_id' => $store->id,
-                            'target_id' => $target->id,
-                            'attachment' => $ref_no.'.pdf',
-                        ]);
-
-                    $request->file('attachment')->move(storage_path('app/public/stores/attachments'), $ref_no.'.pdf');
-
-                    event(new \App\Events\StoreTransfer($store_request, $store_transfer, $store));
-
-                    $this->commit();
-
-                    return response()->json($store_request);
-                } catch (\Exception $e) {
-                    $this->rollback();
-                    logger($e);
-                    return response()->json('Unable to transfer store. Try again later.', 500);
                 }
             } else {
                 return response()->json('Forbidden.', 403);
