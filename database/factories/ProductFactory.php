@@ -36,7 +36,6 @@ class ProductFactory extends Factory
             'main_category' => $category[rand(0,3)],
             'sub_category' => null,
             'sold' => 0,
-            'preview' => null,
         ];
     }
 }
