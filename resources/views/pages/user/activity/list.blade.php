@@ -94,6 +94,35 @@
                                     echo $activity->action_taken;
                                 @endphp
                                 @break;
+                            @case('new_voucher')
+                            @case('update_voucher')
+                                @php
+                                    $store_id_raw = substr($activity->action_taken,
+                                        strpos($activity->action_taken, '<store_id>'),
+                                        strpos($activity->action_taken, '</store_id>')
+                                            - strpos($activity->action_taken, '<store_id>')
+                                            + 11,
+                                    );
+
+                                    $store_id = str_replace(['<store_id>', '</store_id>'], '', $store_id_raw);
+
+                                    $activity->action_taken = str_replace(
+                                        [
+                                            '<store_name>',
+                                            '</store_name>',
+                                            $store_id_raw
+                                        ],
+                                        [
+                                            '<a href="'.route('store.products', $store_id).'">',
+                                            '</a>',
+                                            ''
+                                        ],
+                                        $activity->action_taken
+                                    );
+
+                                    echo $activity->action_taken;
+                                @endphp
+                                @break;
                         @endswitch
                         <span class="small text-muted">&ndash; {{ date('M j, Y h:iA', strtotime($activity->date_recorded)) }}</span>
                     </p>

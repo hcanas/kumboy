@@ -49,7 +49,7 @@ class ShopController extends DatabaseController
             ]);
 
         if (!empty($keyword)) {
-            $query->whereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', [$keyword.'&']);
+            $query->whereRaw('MATCH (name) AGAINST (? IN BOOLEAN MODE)', [$keyword.'*']);
         }
 
         if (!empty($main_category) AND $main_category !== 'all') {

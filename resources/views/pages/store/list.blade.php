@@ -37,7 +37,7 @@
                                                     {{ $store->contact_number }}
                                                 </p>
                                                 <p class="my-1 small">
-                                                    {{ $store->address.', '.$store->map_address }}
+                                                    {{ $store->address_line.', '.$store->map_address }}
                                                 </p>
                                                 @if (Auth::check() AND preg_match('/admin/i', Auth::user()->role))
                                                     <p class="small">

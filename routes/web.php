@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Profile\Store\VoucherController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\Profile\Product\ProfileController as ProductProfileController;
 use App\Http\Controllers\Profile\Store\ProductController as StoreProductController;
@@ -168,6 +169,21 @@ Route::prefix('stores')->group(function () {
         )->name('store.products');
         Route::post('add-product', [StoreProductController::class, 'create'])
             ->name('store.add-product');
+
+        Route::prefix('vouchers')->group(function () {
+            Route::post('search', [VoucherController::class, 'search'])
+                ->name('store.search-vouchers');
+            Route::get('{current_page?}/{items_per_page?}/{keyword?}', [VoucherController::class, 'list'])
+                ->name('store.vouchers');
+            Route::post('create', [VoucherController::class, 'create'])
+                ->name('store.add-voucher');
+            Route::post('update', [VoucherController::class, 'update'])
+                ->name('store.update-voucher');
+            Route::post('activate', [VoucherController::class, 'activate'])
+                ->name('store.activate-voucher');
+            Route::post('deactivate', [VoucherController::class, 'deactivate'])
+                ->name('store.deactivate-voucher');
+        });
     });
 });
 
@@ -218,6 +234,8 @@ Route::prefix('orders')->group(function () {
         ->name('order.create');
     Route::get('complete/{tracking_number}', [OrderController::class, 'complete'])
         ->name('order.complete');
+    Route::post('voucher-details', [OrderController::class, 'getVoucherDetails'])
+        ->name('order.voucher-details');
 });
 
 /*

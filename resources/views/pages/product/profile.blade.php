@@ -63,13 +63,6 @@
                             <span class="ms-1 small">Add To Cart</span>
                             <span class="visually-hidden" id="product_id">{{ $product->id }}</span>
                         </button>
-                    @else
-                        <button class="btn btn-outline-dark btn-sm" disabled>
-                            <div class="d-flex align-items-center">
-                                <i class="material-icons fs-16">production_quantity_limits</i>
-                                <span class="ms-1 small">Out of Stock</span>
-                            </div>
-                        </button>
                     @endif
                 </div>
                 <table class="table table-bordered">
@@ -78,7 +71,9 @@
                         <th colspan="2">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span>Specifications</span>
-                                <span class="fw-normal">{{ $product->qty.' items available' }}</span>
+                                <span class="fw-normal text-black-50">
+                                    {{ $product->qty > 0 ? $product->qty.' items available' : 'Out of Stock' }}
+                                </span>
                             </div>
                         </th>
                     </tr>
@@ -115,7 +110,7 @@
                                         <img src="{{ asset('storage/products/images/preview/'.($variant->preview ?? 'placeholder.jpg')) }}" class="card-img-top product_image">
                                         <div class="card-body p-2">
                                             <p class="mb-1 small ellipsis">{{ $variant->name }}</p>
-                                            <p class="mb-1 text-primary">{{ $variant->price }}</p>
+                                            <p class="mb-1 text-primary">&#8369;{{ $variant->price }}</p>
                                         </div>
                                     </div>
                                 </a>
@@ -297,7 +292,7 @@
                 for (const file of files) {
                     const file_ext = file.name.replace(/^.*\./, '');
 
-                    if (file.size > (500 * 1024) || (file_ext !== 'png' && file_ext !== 'jpg' && file_ext !== 'jpeg')) {
+                    if (file.size > (500 * 1024) || (file_ext.toLowerCase() 'png' && file_ext.toLowerCase() 'jpg' && file_ext.toLowerCase() 'jpeg')) {
                         invalid_images.push(file.name);
                     }
                 }

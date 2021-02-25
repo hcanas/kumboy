@@ -9,12 +9,14 @@ use App\Events\AutoAcceptedStoreTransfer;
 use App\Events\CancelledStoreApplication;
 use App\Events\CancelledStoreTransfer;
 use App\Events\CreatedProduct;
+use App\Events\CreatedVoucher;
 use App\Events\GenericUserActivity;
 use App\Events\RejectedStoreApplication;
 use App\Events\RejectedStoreTransfer;
 use App\Events\StoreApplication;
 use App\Events\StoreTransfer;
 use App\Events\UpdatedProduct;
+use App\Events\UpdatedVoucher;
 use App\Listeners\LogAcceptedStoreApplication;
 use App\Listeners\LogAcceptedStoreTransfer;
 use App\Listeners\LogAutoAcceptedStoreApplication;
@@ -22,12 +24,14 @@ use App\Listeners\LogAutoAcceptedStoreTransfer;
 use App\Listeners\LogCancelledStoreApplication;
 use App\Listeners\LogCancelledStoreTransfer;
 use App\Listeners\LogCreatedProduct;
+use App\Listeners\LogCreatedVoucher;
 use App\Listeners\LogGenericUserActivity;
 use App\Listeners\LogRejectedStoreApplication;
 use App\Listeners\LogRejectedStoreTransfer;
 use App\Listeners\LogStoreApplication;
 use App\Listeners\LogStoreTransfer;
 use App\Listeners\LogUpdatedProduct;
+use App\Listeners\LogUpdatedVoucher;
 use App\Listeners\NotifyAcceptedStoreApplication;
 use App\Listeners\NotifyAcceptedStoreTransfer;
 use App\Listeners\NotifyAutoAcceptedStoreTransfer;
@@ -90,6 +94,12 @@ class EventServiceProvider extends ServiceProvider
         ],
         UpdatedProduct::class => [
             LogUpdatedProduct::class,
+        ],
+        CreatedVoucher::class => [
+            LogCreatedVoucher::class,
+        ],
+        UpdatedVoucher::class => [
+            LogUpdatedVoucher::class,
         ],
     ];
 

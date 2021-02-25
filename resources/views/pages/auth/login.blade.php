@@ -6,10 +6,11 @@
         <div class="row">
             <div class="col-md-4 offset-md-4">
                 <div class="card mt-5">
-                    <div class="card-header bg-light py-3">
-                        <h3 class="card-title text-center">Login</h3>
-                    </div>
                     <div class="card-body">
+                        <h3 class="card-title text-center py-3">Login</h3>
+
+                        <hr>
+
                         @if (session('message_type'))
                             <div class="alert alert-{{ session('message_type') }}">{{ session('message_content') }}</div>
                         @endif
@@ -45,13 +46,15 @@
                                 <button type="submit" class="btn btn-primary btn-sm">LOGIN</button>
                             </div>
                         </form>
-                    </div>
 
-                    <div class="card-footer bg-light py-3">
-                        <div class="d-flex justify-content-center">
-                            <a href="{{ route('google.login') }}">
-                                <img src="{{ asset('google/1x/btn_google_signin_dark_normal_web.png') }}">
-                            </a>
+                        <hr>
+
+                        <div class="py-3">
+                            <div class="d-flex justify-content-center">
+                                <a href="{{ route('google.login') }}">
+                                    <img src="{{ asset('google/1x/btn_google_signin_dark_normal_web.png') }}">
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>

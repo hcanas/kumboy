@@ -8,12 +8,12 @@
                 <div class="d-grid d-block mb-3">
                     <button type="button" class="btn btn-primary btn-sm my-2" id="add_product">
                         <div class="d-flex justify-content-center align-items-center">
-                            <i class="material-icons fs-18">add_circle</i>
-                            <span class="ms-1">ADD PRODUCT</span>
+                            <i class="material-icons fs-16">add</i>
+                            <span class="ms-1 small">ADD PRODUCT</span>
                         </div>
                     </button>
                 </div>
-            @endif
+            @endcan
             @php
                 echo $product_filter;
             @endphp
@@ -22,7 +22,7 @@
             <div id="system_message"></div>
 
             @if ($products->isEmpty())
-                <div class="alert alert-danger mt-2">No records found.</div>
+                <div class="text-center text-muted">No products found.</div>
             @else
                 <div class="row row-cols-3 row-cols-md-4 row-cols-lg-6 gx-1 gx-lg-2 gy-2 g-lg-2" id="product_list">
                     <div class="col d-none" id="product_template">
@@ -200,8 +200,13 @@
                 let invalid_images = [];
                 for (const file of files) {
                     const file_ext = file.name.replace(/^.*\./, '');
+                    console.log(file_ext);
 
-                    if (file.size > (500 * 1024) || (file_ext !== 'png' && file_ext !== 'jpg' && file_ext !== 'jpeg')) {
+                    if (file.size > (500 * 1024)
+                        || (file_ext.toLowerCase() !== 'png'
+                            && file_ext.toLowerCase() !== 'jpg'
+                            && file_ext.toLowerCase() 'jpeg')
+                    ) {
                         invalid_images.push(file.name);
                     }
                 }

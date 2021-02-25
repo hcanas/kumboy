@@ -6,10 +6,11 @@
         <div class="row">
             <div class="col-md-4 offset-md-4">
                 <div class="card mt-5">
-                    <div class="card-header bg-light py-3">
-                        <h4 class="card-title text-center">Account Recovery</h4>
-                    </div>
                     <div class="card-body">
+                        <h4 class="card-title text-center py-3">Account Recovery</h4>
+
+                        <hr>
+
                         @if (session('message_content'))
                             <div class="alert alert-{{ session('message_type') }}">{{ session('message_content') }}</div>
                         @endif

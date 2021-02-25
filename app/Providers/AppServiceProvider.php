@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Store;
 use App\Models\StoreRequest;
 use App\Models\VerificationCode;
+use App\Models\Voucher;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 
@@ -106,5 +107,31 @@ class AppServiceProvider extends ServiceProvider
 
             return true;
         }, 'Some items have invalid format.');
+
+        Validator::extend('voucher_code', function ($attribute, $value, $parameters, $validator) {
+            $id = $validator->getData()['id'];
+
+            $voucher = Voucher::query()
+                ->where('code', $value)
+                ->first();
+
+            if ($voucher !== null AND empty($id)) {
+                return false;
+            } elseif ($voucher !== null AND $voucher->id !== (int) $id) {
+                return false;
+            }
+
+            return true;
+        }, 'The code has already been taken.');
+
+        Validator::extend('voucher_amount', function ($attribute, $value, $parameters, $validator) {
+            $type = $validator->getData()['type'];
+
+            if ($type === 'Percentage' AND $value > 100) {
+                return false;
+            }
+
+            return true;
+        }, 'Amount is over the allowed range.');
     }
 }

@@ -6,7 +6,7 @@
             <div class="col-12">
                 <div class="d-flex flex-column flex-lg-row align-items-start text-center py-3">
                     <img class="card-img mx-auto store-logo" src="{{ asset('storage/stores/logos/'.($store->logo ?? 'placeholder.jpg')) }}" title="Store Logo">
-                    <div class="flex-grow-1 d-flex flex-column align-self-center">
+                    <div class="flex-grow-1 d-flex flex-column align-self-center align-self-lg-start mt-3 mt-lg-0">
                         <a href="{{ route('store.products', $store->id) }}" class="h5 mx-auto ms-lg-2">{{ $store->name }}</a>
                         <p class="my-0 small mx-auto ms-lg-2">
                             {{ $store->contact_number }}
@@ -31,7 +31,7 @@
                             <a href="{{ route('store.products', $store->id) }}" class="btn btn-primary btn-sm">PRODUCTS</a>
                         </div>
                         <div class="col">
-                            <a href="#" class="btn btn-primary btn-sm">VOUCHERS</a>
+                            <a href="{{ route('store.vouchers', $store->id) }}" class="btn btn-primary btn-sm">VOUCHERS</a>
                         </div>
                     </div>
                 </div>

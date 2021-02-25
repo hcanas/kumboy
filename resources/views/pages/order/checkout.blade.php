@@ -18,12 +18,11 @@
                             <span class="visually-hidden">Loading...</span>
                         </div>
                     </div>
-                    <div class="card-header">
-                        <h4 class="my-0">CART</h4>
-                    </div>
                     <div class="card-body p-2">
+                        <h4 class="my-3">CART</h4>
+                        <hr>
                         <div id="cart_items">
-                            <div class="d-flex align-items-stretch bg-light p-2 my-2 d-none" id="item_template">
+                            <div class="d-flex align-items-stretch bg-light p-2 my-2 d-none item" id="item_template">
                                 <img class="item_thumbnail">
                                 <div class="flex-grow-1 mx-2 overflow-hidden">
                                     <a href="#" class="h6 my-0 item_name"></a>
@@ -34,8 +33,10 @@
                                         <div class="small">
                                             <span class="text-muted">Sold by</span>
                                             <a href="#" class="item_seller"></a>
+                                            <span class="d-none item_seller_id"></span>
                                         </div>
                                     </div>
+                                    <div class="d-none item_category"></div>
                                 </div>
                                 <div class="d-flex flex-column justify-content-evenly align-items-end" style="width: 87.58px;">
                                     <div>
@@ -69,10 +70,9 @@
                             <span class="visually-hidden">Loading...</span>
                         </div>
                     </div>
-                    <div class="card-header">
-                        <h4 class="my-0">SUMMARY</h4>
-                    </div>
                     <div class="card-body px-3 py-2" id="summary">
+                        <h4 class="my-3">SUMMARY</h4>
+                        <hr>
                         <p class="fw-bold border-bottom my-1">Contact Information</p>
                         <div class="d-none" id="complete_address">
                             <p class="my-0" id="contact_person"></p>
@@ -94,22 +94,38 @@
                                 <span id="item_count"></span>
                                 <span class="h6 text-primary" id="item_subtotal"></span>
                             </div>
+
                             <div class="d-flex justify-content-between align-items-center">
                                 <span>Delivery Fee</span>
                                 <span class="h6 text-primary" id="delivery_fee"></span>
                             </div>
+
                             <div class="d-flex justify-content-between align-items-center">
                                 <span>Voucher Discount</span>
                                 <span class="h6 text-primary" id="voucher_discount"></span>
                             </div>
-                            <div class="input-group my-2">
-                                <input type="text" class="form-control form-control-sm" id="voucher_code" placeholder="Voucher Code" aria-describedby="apply_voucher_code">
-                                <button class="btn btn-outline-dark btn-sm" type="button" id="apply_voucher_code">Apply</button>
-                            </div>
+
+                            @if (Auth::check())
+                                <form id="form_voucher_code">
+                                    <div class="input-group my-2">
+                                        <input type="text" class="form-control form-control-sm" name="code" placeholder="Voucher Code" aria-describedby="apply_voucher_code">
+                                        <button class="btn btn-outline-dark btn-sm" type="button" id="apply_voucher_code">Apply</button>
+                                    </div>
+                                    <div class="text-danger small" id="voucher_error"></div>
+                                </form>
+                            @else
+                                <div class="alert alert-dark small">
+                                    You must be
+                                    <a href="{{ route('login') }}">logged in</a>
+                                    to apply voucher codes.
+                                </div>
+                            @endif
+
                             <div class="d-flex justify-content-between align-items-center border-top py-2 my-2">
                                 <span>Total</span>
                                 <span class="h6 text-primary" id="total"></span>
                             </div>
+
                             <button type="button" class="btn btn-primary btn-sm d-none" id="place_order">Place Order</button>
                             <div class="alert alert-dark small d-none" id="spending_limit"></div>
                         </div>
@@ -314,6 +330,15 @@
             setSummaryVoucherDiscount(summary_voucher_discount)
             setSummaryTotal(summary_total);
 
+            el_summary.querySelector('#form_voucher_code').addEventListener('submit', e => e.preventDefault());
+            el_summary.querySelector('[name="code"]').value = summary_voucher_code;
+            el_summary.querySelector('#apply_voucher_code').addEventListener('click', e => {
+                e.preventDefault();
+                summary_voucher_code = el_summary.querySelector('[name="code"]').value;
+                addSummaryVoucherDiscount(summary_voucher_discount * -1);
+                computeVoucherDiscount(summary_voucher_code);
+            });
+
             // fetch cart item descriptions
             axios.post('{{ route('order.get-items') }}', { ids : Cart.getItems().map(item => item.id)})
                 .then(response => response.data)
@@ -351,6 +376,7 @@
 
                 el_template.querySelector('.item_price').textContent = '(' + currency_formatter.format(item.price) + ')';
 
+                el_template.querySelector('.item_seller_id').textContent = item.store.id;
                 el_template.querySelector('.item_seller').textContent = item.store.name;
                 el_template.querySelector('.item_seller').href = '../stores/' + item.store.id + '/products';
                 stores[item.store.id] = stores[item.store.id] ?? {};
@@ -364,6 +390,7 @@
                 addSummaryItemSubtotal(el_template_item_qty.value * item.price);
 
                 el_template.querySelector('.item_stock').textContent = '(' + item.qty + ' left)';
+                el_template.querySelector('.item_category').textContent = item.main_category + '|' + (item.sub_category ?? 'all');
 
                 el_cart_items.insertAdjacentElement('beforeEnd', el_template);
 
@@ -405,6 +432,9 @@
                     addSummaryItemCount(difference);
                     addSummaryItemSubtotal(difference * item.price);
                     updateItemQty(parseInt(el_template_item_qty.value));
+
+                    addSummaryVoucherDiscount(summary_voucher_discount * -1);
+                    computeVoucherDiscount(summary_voucher_code);
                 });
 
                 el_template_item_qty_dec.addEventListener('click', e => {
@@ -412,6 +442,8 @@
                     addSummaryItemCount(-1);
                     addSummaryItemSubtotal(item.price * -1);
                     updateItemQty(parseInt(el_template_item_qty.value) - 1);
+                    addSummaryVoucherDiscount(summary_voucher_discount * -1);
+                    computeVoucherDiscount(summary_voucher_code);
                 });
 
                 el_template_item_qty_inc.addEventListener('click', e => {
@@ -419,6 +451,8 @@
                     addSummaryItemCount(1);
                     addSummaryItemSubtotal(item.price);
                     updateItemQty(parseInt(el_template_item_qty.value) + 1);
+                    addSummaryVoucherDiscount(summary_voucher_discount * -1);
+                    computeVoucherDiscount(summary_voucher_code);
                 });
 
                 el_template.querySelector('.remove_item').addEventListener('click', e => {
@@ -449,6 +483,8 @@
 
                         addSummaryItemCount(Cart.getItem(item.id).qty * -1);
                         addSummaryItemSubtotal(Cart.getItem(item.id).qty * item.price * -1);
+                        addSummaryVoucherDiscount(summary_voucher_discount * -1);
+                        computeVoucherDiscount(summary_voucher_code);
 
                         Cart.removeItem(item.id);
                         document.getElementById('item_' + item.id).remove();
@@ -518,6 +554,41 @@
                 addSummaryDeliveryFee(total - summary_delivery_fee);
             }
 
+            function computeVoucherDiscount(voucher_code) {
+                el_summary.querySelector('#voucher_error').textContent = '';
+                if (voucher_code) {
+                    axios.post('{{ route('order.voucher-details') }}', { code: voucher_code })
+                        .then(response => {
+                            const voucher = response.data;
+                            const items = document.querySelectorAll('.item');
+                            let temp_subtotal = 0;
+
+                            items.forEach(item => {
+                                if (item.querySelector('.item_name').textContent.trim() != '') {
+                                    const item_subtotal = parseFloat(item.querySelector('.item_subtotal').textContent.replace(/\u20B1|\,/g, ''));
+                                    const item_category = item.querySelector('.item_category').textContent.trim();
+                                    const item_seller_id = parseInt(item.querySelector('.item_seller_id').textContent.trim());
+
+                                    if (voucher.categories.includes(item_category) && voucher.store_id === item_seller_id) {
+                                        temp_subtotal += item_subtotal;
+                                    }
+                                }
+                            });
+
+                            if (temp_subtotal > 0 && voucher.type === 'Flat Amount') {
+                                addSummaryVoucherDiscount(voucher.amount);
+                            } else if (temp_subtotal > 0 && voucher.type === 'Percentage') {
+                                addSummaryVoucherDiscount(temp_subtotal * (voucher.amount / 100));
+                            } else if (temp_subtotal === 0) {
+                                el_summary.querySelector('#voucher_error').textContent = 'No item is eligible for this voucher.';
+                            }
+                        })
+                        .catch(error => {
+                            el_summary.querySelector('#voucher_error').textContent = error.response.data;
+                        });
+                }
+            }
+
             function addSummaryItemCount(step) {
                 summary_item_count += parseInt(step);
                 setSummaryItemCount(summary_item_count);
@@ -539,7 +610,7 @@
 
             function addSummaryVoucherDiscount(step) {
                 summary_voucher_discount += parseFloat(step);
-                summary_total += parseFloat(step);
+                summary_total -= parseFloat(step);
                 setSummaryVoucherDiscount(summary_voucher_discount);
                 setSummaryTotal(summary_total);
             }

@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\UserAddressBook;
+use App\Models\Voucher;
 use App\Models\VoucherCode;
 use App\Services\MapService;
 use App\Traits\Validation\HasUserAddressValidation;
@@ -21,11 +22,6 @@ class OrderController extends DatabaseController
     public function checkout()
     {
         return view('pages.order.checkout');
-    }
-
-    public function viewItems()
-    {
-        return view('orders.cart');
     }
 
     public function getItems(Request $request)
@@ -76,153 +72,27 @@ class OrderController extends DatabaseController
         }
     }
 
+    public function getVoucherDetails(Request $request)
+    {
+        if ($request->wantsJson()) {
+            $voucher = Voucher::query()
+                ->where('code', $request->get('code'))
+                ->whereDate('valid_from', '<=', now())
+                ->whereDate('valid_to', '>=', now())
+                ->where('status', 'active')
+                ->first();
+
+            if ($voucher === null) {
+                return response()->json('Unable to use voucher code.', 400);
+            }
+
+            return response()->json($voucher);
+        }
+    }
+
     public function placeOrder(Request $request, MapService $map_service)
     {
-        // TODO
-        // items array indexes are product ids, values are corresponding quantities
-        $items = $request->get('items');
-        $voucher_code = $request->get('voucher_code');
-
-        $validator = Validator::make($request->all(), $this->getUserAddressRules([
-            'contact_person',
-            'contact_number',
-            'address_line',
-            'map_address',
-            'map_coordinates',
-        ]));
-
-        if ($validator->fails()) {
-            return back()
-                ->with('message_type', 'danger')
-                ->with('message_content', 'Invalid address information.');
-        }
-
-        if ($map_service->isValidAddress($request->get('map_coordinates'), $request->get('map_address')) === false) {
-            return back()
-                ->with('message_type', 'danger')
-                ->with('message_content', 'Invalid map address or out of service area.');
-        }
-
-        if ($items !== null AND is_array($items)) {
-            foreach ($items AS $k => $v) {
-                if ((ctype_digit($k) === false AND is_int($k) === false)
-                    OR (ctype_digit($v) === false AND is_int($v) === false)) {
-                    return back()
-                        ->with('message_type', 'danger')
-                        ->with('message_content', 'Invalid request.');
-                }
-            }
-
-            if ($voucher_code !== null) {
-                $voucher_code = VoucherCode::query()
-                    ->where('code', $voucher_code)
-                    ->first();
-
-                if ($voucher_code === null) {
-                    return back()
-                        ->with('message_type', 'danger')
-                        ->with('message_content', 'Invalid voucher code.');
-                }
-            }
-
-            try {
-                $this->beginTransaction();
-
-                $products = Product::query()
-                    ->whereIn('id', array_keys($items))
-                    ->with('store')
-                    ->with(['specifications' => function ($query) {
-                        $query->orderBy('name');
-                    }])
-                    ->lockForUpdate()
-                    ->get();
-
-                // date + random bytes to decimal
-                $tracking_number = date('Ymd', strtotime('now')).hexdec(bin2hex(random_bytes(2)));
-
-                $order = Order::query()
-                    ->create([
-                        'user_id' => Auth::check() ? Auth::id() : null,
-                        'tracking_number' => $tracking_number,
-                        'contact_person' => $validator->validated()['contact_person'],
-                        'contact_number' => $validator->validated()['contact_number'],
-                        'address' => $validator->validated()['address'],
-                        'map_address' => $validator->validated()['map_address'],
-                        'map_coordinates' => $validator->validated()['map_coordinates'],
-                        'voucher_code' => $voucher_code !== null ? $voucher_code->code : null,
-                        'delivery_fee' => 0,
-                    ]);
-
-                $store_owner_ids = []; // for notification
-                $store_owner_coordinates = []; // for delivery fee
-                $delivery_fee_rate = config('system.delivery_fee_rate');
-                $delivery_fee = 0;
-
-                foreach ($products AS $product) {
-                    if (in_array($product->store->user_id, $store_owner_ids) === false) {
-                        $store_owner_ids[] = $product->store->user_id;
-                    }
-
-                    if (in_array($product->store->map_coordinates, $store_owner_coordinates) === false) {
-                        $store_owner_coordinates[] = $product->store->map_coordinates;
-                        list($status, $response) = $map_service->getDistanceInKm(
-                            $order->map_coordinates,
-                            $product->store->map_coordinates
-                        );
-
-                        if ($status === true) {
-                            $delivery_fee += ($delivery_fee_rate * $response);
-                        } else {
-                            throw new Exception($response);
-                        }
-                    }
-
-                    if ($product->qty < $items[$product->id]) {
-                        $this->rollback();
-                        return back()
-                            ->with('message_type', 'danger')
-                            ->with('message_content', 'Some products have insufficient stock.');
-                    }
-
-                    $product->update(['qty' => $product->qty - $items[$product->id]]);
-
-                    $specifications = '';
-                    foreach ($product->specifications AS $specification) {
-                        $specifications .= ','.$specification['name'].':'.$specification['value'];
-                    }
-                    $specifications = ltrim($specifications, ',');
-
-                    $order->items()->create([
-                        'order_id' => $order->id,
-                        'product_id' => $product->id,
-                        'name' => $product->name,
-                        'specifications' => $specifications,
-                        'qty' => $items[$product->id],
-                        'price' => $product->price,
-                        'status' => 'pending',
-                    ]);
-                }
-
-                $order->update(['delivery_fee' => $delivery_fee]);
-
-                event(new OrderPlaced($order, $store_owner_ids));
-
-                $this->commit();
-
-                return redirect()
-                    ->route('order.complete', $tracking_number);
-            } catch (\Exception $e) {
-                logger($e);
-                $this->rollback();
-                return back()
-                    ->with('message_type', 'danger')
-                    ->with('message_content', 'Server error. Try again later.');
-            }
-        } else {
-            return back()
-                ->with('message_type', 'danger')
-                ->with('message_content', 'Invalid request.');
-        }
+        dd($request->all());
     }
 
     public function complete($tracking_number)
