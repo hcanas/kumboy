@@ -205,7 +205,7 @@
                     if (file.size > (500 * 1024)
                         || (file_ext.toLowerCase() !== 'png'
                             && file_ext.toLowerCase() !== 'jpg'
-                            && file_ext.toLowerCase() 'jpeg')
+                            && file_ext.toLowerCase() !== 'jpeg')
                     ) {
                         invalid_images.push(file.name);
                     }
